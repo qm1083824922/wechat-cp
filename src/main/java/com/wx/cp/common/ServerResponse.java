@@ -1,15 +1,16 @@
 package com.wx.cp.common;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 
 /**
  * Created by qm
  */
-@JsonSerialize(include =  JsonSerialize.Inclusion.NON_NULL)
-//保证序列化json的时候,如果是null的对象,key也会消失
+@Getter
+@Setter
 public class ServerResponse<T> implements Serializable {
 
     private int status;
@@ -40,17 +41,6 @@ public class ServerResponse<T> implements Serializable {
     public boolean isSuccess(){
         return this.status == ResponseCode.SUCCESS.getCode();
     }
-
-    public int getStatus(){
-        return status;
-    }
-    public T getData(){
-        return data;
-    }
-    public String getMsg(){
-        return msg;
-    }
-
 
     public static <T> ServerResponse<T> createBySuccess(){
         return new ServerResponse<T>(ResponseCode.SUCCESS.getCode());
