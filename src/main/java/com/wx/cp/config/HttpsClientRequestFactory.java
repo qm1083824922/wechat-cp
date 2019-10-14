@@ -1,4 +1,4 @@
-package com.wx.cp.test;
+package com.wx.cp.config;
 
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 
