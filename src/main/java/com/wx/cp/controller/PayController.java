@@ -55,8 +55,8 @@ public class PayController {
     public ServerResponse<ResultVO<WaitingVerifyOrderVO>> waitingAuditOrder(HttpServletRequest request, PageVO pageVO) {
         try {
             String openid = tokenUtil.getToken(request);
-            log.info("openid={}", openid);
 //            String openid = "YueYi";
+            log.info("openid={}", openid);
             ResultVO<WaitingVerifyOrderVO> verifyOrderVOList = new ResultVO<>();
             if (StringUtils.isNotBlank(openid)) {
                 String url = URLConstant.AUDIT_QUERY;
@@ -71,7 +71,6 @@ public class PayController {
                     JSONObject responseJson = JSONObject.parseObject(response);
                     String items = responseJson.getString(URLConstant.RETURN_ITEMS);
                     log.info("items={}", JSON.parseArray(items, WaitingVerifyOrderVO.class));
-                    //返回的数据转成集合
                     List<WaitingVerifyOrderVO> waitingVerifyOrderVOS = JSON.parseArray(items, WaitingVerifyOrderVO.class);
                     ArrayList<WaitingVerifyOrderVO> list = new ArrayList<>();
                     for (WaitingVerifyOrderVO waitingVerifyOrderVO : waitingVerifyOrderVOS) {
@@ -97,7 +96,7 @@ public class PayController {
     public ServerResponse<List<AuditResponseVO>> payOrderQuery(HttpServletRequest request) {
         try {
             String openid = tokenUtil.getToken(request);
-//            String openid = "YueYi";
+//            String openid = "YaoShunGeng";
             if (StringUtils.isNotBlank(openid)) {
                 AuditRequestVO auditRequestVO = new AuditRequestVO();
                 auditRequestVO.setOpenid(openid);
@@ -118,7 +117,6 @@ public class PayController {
                             maps.put(oldTbAudit.getPoId(), oldTbAudit);
                             newTbAudits.add(oldTbAudit);
                         }
-
                         List<AuditResponseVO> auditResponseVOList = new ArrayList<>();
                         for (TbAudit audit : newTbAudits) {
                             AuditResponseVO auditResponseVO = new AuditResponseVO();
@@ -140,14 +138,6 @@ public class PayController {
                         return ServerResponse.createBySuccess(auditResponseVOList);
                     }
                 }
-//                QueryWrapper<TbAudit> auditQueryWrapper = new QueryWrapper<>();
-//                auditQueryWrapper.eq("po_type", StatusConstant.INT_5)
-////                    .eq("state", StatusConstant.INT_30)
-//                    .eq("audit_state", StatusConstant.INT_1)
-//                    .eq("auditor_id", baseUser.getId());
-//
-//                List<TbAudit> auditList = auditService.list(auditQueryWrapper);
-
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -277,7 +267,7 @@ public class PayController {
     public ServerResponse<ResultVO<AuditFlowsVO>> verifyPass(HttpServletRequest request, AuditVO auditVO) {
         try {
             String openid = tokenUtil.getToken(request);
-//            String openid = "YueYi";
+//            String openid = "YaoShunGeng";
             if (StringUtils.isNotBlank(openid)) {
                 auditVO.setOpenid(openid);
                 String agreedUrl = URLConstant.PAY_ORDER_BOSS_AUDIT;

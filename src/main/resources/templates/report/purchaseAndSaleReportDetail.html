@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="../../static/css/element-ui/index.css">
+</head>
+<body>
+<div id="app">
+    <template>
+        <el-table
+            :data="tableData.slice((currentPage-1) * pagesize,currentPage * pagesize)"
+            ref="singleTable"
+            highlight-current-row
+            border
+            style="width: 100%">
+            <el-table-column type="index" label="序号" width="50" ></el-table-column>
+            <el-table-column prop="billNo" label="单据编号"></el-table-column>
+            <el-table-column prop="billDate" label="单据日期"></el-table-column>
+            <el-table-column prop="billTypeName" label="单据类型"></el-table-column>
+            <el-table-column prop="number" label="数量"></el-table-column>
+            <el-table-column prop="amount" label="金额"></el-table-column>
+            <el-table-column prop="numberSum" label="数量结余"></el-table-column>
+            <el-table-column prop="amountSum" label="金额结余"></el-table-column>
+        </el-table>
+        <el-pagination
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="currentPage"
+            :page-sizes="[10, 20, 30, 50]"
+            :page-size="pagesize"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="tableData.length">
+        </el-pagination>
+    </template>
+</div>
+</body>
+<!-- jQuery (Bootstrap 的所有 JavaScript 插件都依赖 jQuery，所以必须放在前边) -->
+<script src="../../static/js/jquery.min.js"></script>
+<!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
+<script src="../../static/js/bootstrap.min.js"></script>
+<script src="../../static/js/vue.min.js"></script>
+<script src="../../static/js/axios.min.js"></script>
+<script src="../../static/js/jquery.cookie.js"></script>
+<script src="../../static/js/element-ui/index.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                currentPage:1, //初始页
+                pagesize:10,    //    每页的数据
+                tableData: [],
+            }
+        },
+        mounted(){
+            this.handleList();
+        },
+        methods : {
+            // 初始页currentPage、初始每页数据数pagesize和数据data
+            handleSizeChange: function (size) {
+                this.pagesize = size;
+                console.log(this.pagesize)  //每页下拉显示数据
+            },
+            handleCurrentChange: function(currentPage){
+                this.currentPage = currentPage;
+                console.log(this.currentPage)  //点击第几页
+            },
+            handleList(){
+                const url = 'http://localhost:9090/inventoryReport/detail';
+                axios.get(url, {
+                    params: {
+                        projectId: $.cookie('projectId')
+                    }
+                })
+                    .then(response => {
+                        this.tableData = response.data.data;
+                        console.log(response);
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+            },
+            getSummaries(param) {
+                const { columns, data } = param;
+                const sums = [];
+                columns.forEach((column, index) => {
+                    if (index === 0) {
+                        sums[index] = '总价';
+                        return;
+                    }
+                    const values = data.map(item => Number(item[column.property]));
+                    if (!values.every(value => isNaN(value))) {
+                        sums[index] = values.reduce((prev, curr) => {
+                            const value = Number(curr);
+                            if (!isNaN(value)) {
+                                return prev + curr;
+                            } else {
+                                return prev;
+                            }
+                        }, 0);
+                        sums[index] += ' 元';
+                    } else {
+                        sums[index] = 'N/A';
+                    }
+                });
+                return sums;
+            }
+        }
+    })
+</script>
+</html>

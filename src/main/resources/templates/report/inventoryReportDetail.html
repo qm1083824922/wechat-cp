@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="../../static/css/element-ui/index.css">
+</head>
+<body>
+<div id="app">
+    <template>
+        <el-table
+            :data="tableData.slice((currentPage-1) * pagesize,currentPage * pagesize)"
+            ref="singleTable"
+            highlight-current-row
+            border
+            style="width: 100%">
+            <el-table-column type="index" label="序号" width="50" ></el-table-column>
+            <el-table-column prop="projectName" label="项目"></el-table-column>
+            <el-table-column prop="warehouseName" label="仓库"></el-table-column>
+            <el-table-column prop="goodsType" label="商品分类"></el-table-column>
+            <el-table-column prop="brand" label="商品品牌"></el-table-column>
+            <el-table-column prop="goodsNo" label="商品编码"></el-table-column>
+            <el-table-column prop="barCode" label="商品国际码"></el-table-column>
+            <el-table-column prop="goodsName" label="商品描述"></el-table-column>
+            <el-table-column prop="sumStore" label="总库存"></el-table-column>
+            <el-table-column prop="sumLock" label="锁定库存"></el-table-column>
+            <el-table-column prop="sumNotLock" label="未锁定库存"></el-table-column>
+            <el-table-column prop="sumNum" label="总数量"></el-table-column>
+            <el-table-column prop="sumLockNum" label="锁定数量"></el-table-column>
+            <el-table-column prop="sumNotLockNum" label="未锁定数量"></el-table-column>
+            <el-table-column prop="inLibraryCount1" label="(0,20)天库龄数量"></el-table-column>
+            <el-table-column prop="inLibraryAmount1" label="(0,20)天库龄金额"></el-table-column>
+            <el-table-column prop="inLibraryCount2" label="[20,60)天库龄数量"></el-table-column>
+            <el-table-column prop="inLibraryAmount2" label="[20,60)天库龄金额"></el-table-column>
+            <el-table-column prop="inLibraryCount3" label="[60,+∞)天库龄数量"></el-table-column>
+            <el-table-column prop="inLibraryAmount3" label="[60,+∞)天库龄金额"></el-table-column>
+            <el-table-column prop="dateOfExpiryCount1" label="(0,⅓)效期内数量"></el-table-column>
+            <el-table-column prop="dateOfExpiryAmount1" label="(0,⅓)效期内金额"></el-table-column>
+            <el-table-column prop="dateOfExpiryCount2" label="[⅓,½)效期内数量"></el-table-column>
+            <el-table-column prop="dateOfExpiryAmount2" label="[⅓,½)效期内金额"></el-table-column>
+            <el-table-column prop="dateOfExpiryCount3" label="[½,+∞)效期内数量"></el-table-column>
+            <el-table-column prop="dateOfExpiryAmount3" label="[½,+∞)效期内金额"></el-table-column>
+        </el-table>
+        <el-pagination
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="currentPage"
+            :page-sizes="[10, 15, 30, 45]"
+            :page-size="pagesize"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="tableData.length">
+        </el-pagination>
+    </template>
+</div>
+</body>
+<!-- jQuery (Bootstrap 的所有 JavaScript 插件都依赖 jQuery，所以必须放在前边) -->
+<script src="../../static/js/jquery.min.js"></script>
+<!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
+<script src="../../static/js/bootstrap.min.js"></script>
+<script src="../../static/js/vue.min.js"></script>
+<script src="../../static/js/axios.min.js"></script>
+<script src="../../static/js/jquery.cookie.js"></script>
+<script src="../../static/js/element-ui/index.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                currentPage:1, //初始页
+                pagesize:15,    //    每页的数据
+                tableData: [],
+                // domain: 'http://localhost:9090/'
+                // domain: 'http://devwx.asters.cn/'
+                domain: 'http://wx.asters.cn/'
+            }
+        },
+        mounted(){
+            this.handleList();
+        },
+        methods : {
+            // 初始页currentPage、初始每页数据数pagesize和数据data
+            handleSizeChange: function (size) {
+                this.pagesize = size;
+                console.log(this.pagesize)  //每页下拉显示数据
+            },
+            handleCurrentChange: function(currentPage){
+                this.currentPage = currentPage;
+                console.log(this.currentPage)  //点击第几页
+            },
+            handleList(){
+                const url = this.domain + 'inventoryReport/detail';
+                axios.get(url, {
+                    params: {
+                        projectId: $.cookie('projectId')
+                    }
+                })
+                    .then(response => {
+                        this.tableData = response.data.data;
+                        console.log(response);
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+            },
+            handleDetail(row){
+                $.cookie('projectId', row.projectId);
+                window.location.href = this.domain + "report/inventoryReportDetail";
+            },
+            getSummaries(param) {
+                const { columns, data } = param;
+                const sums = [];
+                columns.forEach((column, index) => {
+                    if (index === 0) {
+                        sums[index] = '合计';
+                        return;
+                    }
+                    const values = data.map(item => Number(item[column.property]));
+                    if (!values.every(value => isNaN(value))) {
+                        sums[index] = values.reduce((prev, curr) => {
+                            const value = Number(curr);
+                            if (!isNaN(value)) {
+                                return prev + curr;
+                            } else {
+                                return prev;
+                            }
+                        }, 0);
+                        sums[index] += ' 元';
+                    } else {
+                        sums[index] = 'N/A';
+                    }
+                });
+
+                return sums;
+            }
+        }
+    })
+</script>
+</html>

@@ -23,8 +23,7 @@ wechat:
               secret: V8yqbZmMYCMza1BPE8LUyGv5iG_3wxi5JfBM1zpANZQ
               token:
               aesKey:
-            - agentId: 1000005
-              secret: SJbQH32HgA955DiDEhPz9h_GXlzH4HKECACUW_5qEDQ
+            - agentId: 1000023
+              secret: aN2CDdLrrGeVaqWRUl8aYeQuGUUm5dL5S6bcpO0-h40
               token:
               aesKey:
-

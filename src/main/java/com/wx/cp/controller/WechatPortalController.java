@@ -45,34 +45,4 @@ public class WechatPortalController {
         return "purchaseUnVerifiedDetailPage";
     }
 
-
-//    @RequestMapping("/audit")
-//    @ResponseBody
-//    public ServerResponse audit(@RequestParam(value = "start",defaultValue = "0") int start,
-//                                    @RequestParam(value = "start",defaultValue = "25") int pageSize){
-//        List<AuditVO> auditVOList = new ArrayList<>();
-//        try {
-////            List<TbAudit> audits = auditService.queryWaitAudit(start, pageSize);
-////            for (TbAudit audit : audits) {
-//////                AuditVO auditVO = new AuditVO();
-////                auditVO.setId(audit.getId());
-////                auditVO.setPoTypeName(StatusUtil.getPoType(audit.getPoType()));
-////                auditVO.setPoNO(audit.getPoNo());
-////                auditVO.setAmount(audit.getAmount().setScale(2));
-////                auditVO.setStateName(StatusUtil.getAuditStatus(audit.getState()));
-////                auditVO.setProjectName(baseProjectService.queryProjectNameById(audit.getProjectId()));
-////                auditVO.setCustomerName(baseSubjectService.querySubjectNameById(audit.getCustomerId()));
-////                auditVO.setSupplierName(baseSubjectService.querySubjectNameById(audit.getBusinessUnitId()));
-////                auditVO.setBusinessUnitName(baseSubjectService.querySubjectNameById(audit.getProjectId()));
-////                auditVO.setProposerAt(DateFormatterUtil.dateFormat(audit.getProposerAt()));
-////                auditVO.setProposer(audit.getProposer());
-////                auditVOList.add(auditVO);
-////            }
-////        } catch (Exception e) {
-////            e.printStackTrace();
-////        }
-////
-////        return ServerResponse.createBySuccess(auditVOList);
-////    }
-
 }

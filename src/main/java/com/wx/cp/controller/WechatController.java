@@ -53,26 +53,39 @@ public class WechatController {
     private HttpUtil httpUtil;
 
     /**
-     * 用户授权
-     * OAuth2网页授权
-     * 1.首先构造网页授权url，然后构成超链接让用户点击
-     * 2.当用户同意授权后，会回调所设置的url并把authorization code传过来，然后用这个code获得userid.
+     * AOC审批认证接口
+     * @param returnUrl
+     * @return
      */
     @GetMapping("/authorize")
     public String auth(@RequestParam("returnUrl") String returnUrl) {
         Integer agentId = wxCpProperties.getAppConfigs().get(0).getAgentId();
+        return getAuthorized(returnUrl, agentId);
+    }
+
+    /**
+     * 库存报表认证接口
+     * @param returnUrl
+     * @return
+     */
+    @GetMapping("/inventoryAuthorized")
+    public String inventoryAuth(@RequestParam("returnUrl") String returnUrl) {
+        Integer agentId = wxCpProperties.getAppConfigs().get(1).getAgentId();
+        return getAuthorized(returnUrl, agentId);
+    }
+
+    private String getAuthorized(String returnUrl, Integer agentId) {
         final WxCpService wxCpService = WxCpConfiguration.getCpService(agentId);
         String url = wxCpProperties.getUserInfoUrl();
         String redirectUrl = null;
         try {
-            //构造授权链接
-            log.info("回调地址={}",returnUrl);
-            redirectUrl = wxCpService.getOauth2Service().buildAuthorizationUrl(url, URLEncoder.encode(returnUrl,"UTF-8"), WxConsts.OAuth2Scope.SNSAPI_BASE);
+            log.info("回调地址={}", returnUrl);
+            redirectUrl = wxCpService.getOauth2Service().buildAuthorizationUrl(url, URLEncoder.encode(returnUrl, "UTF-8"), WxConsts.OAuth2Scope.SNSAPI_BASE);
 
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        log.info("redirectUrl={}",redirectUrl);
+        log.info("redirectUrl={}", redirectUrl);
         return "redirect:" + redirectUrl;
     }
 
@@ -113,7 +126,7 @@ public class WechatController {
     public WxCpUser getUser() throws WxErrorException {
         Integer agentId = wxCpProperties.getAppConfigs().get(0).getAgentId();
         final WxCpService wxCpService = WxCpConfiguration.getCpService(agentId);
-        return wxCpService.getUserService().getById("YueYi");
+        return wxCpService.getUserService().getById("");
     }
 
     /**
@@ -149,7 +162,6 @@ public class WechatController {
                 openid = tbBaseUser.getOpenid();
             }
             if (StringUtils.isNotBlank(openid)) {
-                //从数据库中查询对应的身份
                 String url = wxCpProperties.getProjectUrl() + URLConstant.AUTHROIZE_TEST_DOMAIN;
                 WxCpProperties.AppConfig appConfig = wxCpProperties.getAppConfigs().get(0);
                 Integer agentId = appConfig.getAgentId();

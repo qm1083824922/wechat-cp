@@ -6,8 +6,11 @@ package com.wx.cp.constants;
 public class URLConstant {
 
     public final static String PAY_DOMAIN = "http://127.0.0.1:8080/scfs/wechat/pay/";
+
     public final static String USER_DOMAIN = "http://127.0.0.1:8080/scfs/wechat/baseUser/";
     public final static String PROJECT_DOMAIN = "http://127.0.0.1:8080/scfs/wechat/project/";
+    public final static String INVENTORY_DOMAIN = "http://127.0.0.1:8080/scfs/wechat/inventoryReport/";
+    public final static String PURCHASE_AND_SALE_DOMAIN = "http://127.0.0.1:8080/scfs/wechat/purchaseAndSaleReport/";
     public final static String AUDIT_DOMAIN = "http://127.0.0.1:8080/scfs/wechat/audit/";
     public final static String AUTHROIZE_TEST_DOMAIN = "/wechat/authorize?returnUrl=http://wx.asters.cn/pay/portal/waitingPayOrderList";
     public final static String AUTHROIZE_PRO_DOMAIN = "/wechat/authorize?returnUrl=http://wx.asters.cn/pay/portal/waitingPayOrderList";
@@ -34,6 +37,18 @@ public class URLConstant {
     public final static String PAY_ORDER_FINANCE_OFFICER_AUDIT = PAY_DOMAIN + "payOrder/finance2/audit";
     //部门主管审核
     public final static String PAY_ORDER_DEPARTMENT_MANAGER_AUDIT = PAY_DOMAIN + "payOrder/dept/audit";
+
+    //报表相关
+    //库存报表list
+    public final static String INVENTORY_REPORT_LIST = INVENTORY_DOMAIN + "list";
+    //库存报表详情
+    public final static String INVENTORY_REPORT_DETAIL = INVENTORY_DOMAIN + "detail";
+
+    //进销存报表
+    //商品进销存报表
+    public final static String PURCHASE_AND_SALE_REPORT_GOODS_LIST = PURCHASE_AND_SALE_DOMAIN + "goodsList";
+    //商品进销存报表详情
+    public final static String PURCHASE_AND_SALE_REPORT_GOODS_DETAIL = PURCHASE_AND_SALE_DOMAIN + "goodsDetail";
 
     public final static String PAY_ORDER_UNPASS_AUDIT = PAY_DOMAIN + "payOrder/unpass/audit";
     public final static String PAY_ORDER_AUDIT_PARAM = "";

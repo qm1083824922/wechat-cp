@@ -23,12 +23,9 @@ wechat:
               secret: 54eXGi_TJSGERoixAZ7PqqFOJlO3Qq_B-FMg-lK20Iw
               token:
               aesKey:
-            - agentId: 1000016
-              secret: V8yqbZmMYCMza1BPE8LUyGv5iG_3wxi5JfBM1zpANZQ
+            - agentId: 1000022
+              secret: Ws-jHbIcqSJ43Cgsc8gOidnVvWoF9_RAlE24Ew9Jrfo
               token:
               aesKey:
-            - agentId: 1000005
-              secret: SJbQH32HgA955DiDEhPz9h_GXlzH4HKECACUW_5qEDQ
-              token:
-              aesKey:
+
 

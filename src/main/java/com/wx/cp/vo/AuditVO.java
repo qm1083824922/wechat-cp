@@ -1,5 +1,6 @@
 package com.wx.cp.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -11,16 +12,22 @@ import lombok.ToString;
 @Setter
 @ToString
 public class AuditVO{
-
+    @ApiModelProperty(value = "审核人ID")
     private Integer auditId;
+    @ApiModelProperty(value = "项目ID")
     private Integer projectItemId;
+    @ApiModelProperty(value = "审核意见")
     private String suggestion;
+    @ApiModelProperty(value = "微信唯一标识")
     private String openid;
+    @ApiModelProperty(value = "付款ID")
     private String payId;
+    @ApiModelProperty(value = "创建时间")
     private int operation;
+    @ApiModelProperty(value = "状态")
     private Integer state;
+    @ApiModelProperty(value = "用户ID")
     private Integer userId;
+    @ApiModelProperty(value = "单据类型")
     private Integer poType;
-
-
 }

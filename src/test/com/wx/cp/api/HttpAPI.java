@@ -1,11 +1,13 @@
 package com.wx.cp.api;
-
 import org.junit.Test;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +38,7 @@ public class HttpAPI {
         System.out.println(currentWeek);
     }
 
-    public CurrentDateTime getDate() {
+    public CurrentDateTime getMonthStartAndEndDate() {
         CurrentDateTime currentDateTime = new CurrentDateTime();
         LocalDate now = LocalDate.now();
         int year = now.getYear();
@@ -57,7 +59,7 @@ public class HttpAPI {
             case OCTOBER:
             case NOVEMBER: {
                 currentDateTime.setStartDate(year + "-" + nowMonth + "-01");
-                currentDateTime.setEndDate(year + "-" + nowMonth + "-" + days);
+                currentDateTime.setEndDate(now.toString());
                 return currentDateTime;
             }
         }
@@ -125,7 +127,61 @@ public class HttpAPI {
         }
 
         BigDecimal bigDecimal = new BigDecimal("1.00");
-        System.out.println(bigDecimal.setScale(0).toString());
+        System.out.println(bigDecimal.toString());
 
     }
+
+    @Test
+    public void testMoney(){
+        BigDecimal bigDecimal = new BigDecimal("0.130266");
+        BigDecimal bigDecimal1 = new BigDecimal("2422198");
+        BigDecimal bigDecimal2 = bigDecimal1.divide(bigDecimal,2,RoundingMode.HALF_UP);
+        System.out.println(bigDecimal2);
+        LocalDateTime date = LocalDateTime.now();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime firstday = date.with(TemporalAdjusters.firstDayOfMonth());
+        System.out.println(firstday.format(dateTimeFormatter));
+        LocalDateTime lastDay = date.with(TemporalAdjusters.lastDayOfMonth());
+        CurrentDateTime date1 = getMonthStartAndEndDate();
+        System.out.println(date1.getStartDate());
+        System.out.println(date1.getEndDate());
+        System.out.println(lastDay.format(dateTimeFormatter));
+
+        CurrentDateTime currentDateTime = new CurrentDateTime();
+        boolean wechatFlag = currentDateTime.isIswechatFlag();
+        System.out.println(wechatFlag);
+    }
+
+    @Test
+    public void testString(){
+        String  str = "农夫|迪奥|魅可";
+        String[] split = str.split("\\|");
+//        for (String s : split) {
+//            System.out.println(s);
+//        }
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String st : split) {
+            stringBuilder.append("'");
+            stringBuilder.append(st);
+            stringBuilder.append("',");
+        }
+        String substring=stringBuilder.toString();
+        substring=substring.substring(0,substring.lastIndexOf(","));
+        System.out.println("substring = "+substring);
+//        System.out.println(testStr1(str));
+//        List<String> strList = new ArrayList<>();
+//        strList.add("111");
+//        strList.add("222");
+//        strList.add("333");
+//        ArrayList<Object> objects = new ArrayList<>(strList);
+//        for (Object object : objects) {
+//            System.out.println(object);
+//        }
+    }
+
+    public boolean testStr1(String str){
+        return str.contains("|");
+    }
+
+
 }
