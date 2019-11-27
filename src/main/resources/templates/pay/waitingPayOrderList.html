@@ -5,7 +5,7 @@
     <meta content="IE=edge" http-equiv="X-UA-Compatible">
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
-    <title>付款单</title>
+    <title>AOC-单据审核</title>
 
     <!-- Bootstrap -->
     <link href="../../static/css/bootstrap.min.css" rel="stylesheet">
@@ -35,11 +35,11 @@
                     <h5>单据编号: {{item.poNo}}</h5>
                     <h5>单据类型: {{item.poTypeName}}</h5>
                     <h5>项目: {{item.projectName}}</h5>
-                    <h5>金额: {{item.amount}} 元</h5>
+                    <h5>金额: {{item.amount|NumFormat}} 元</h5>
                     <h5>审核状态: <span class="label label-info">{{item.stateName}}</span></h5>
                     <h5>申请时间： {{item.proposerAt}}</h5>
                     <h5>申请人: {{item.proposer}}</h5>
-                    <p @click="detail(item.id,item.poId,item.projectName,item.state)" class="btn btn-primary btn-sm">查看详情</p>
+                    <p @click="detail(item.id,item.poId,item.projectId,item.poType,item.poId,item.projectName,item.state)" class="btn btn-primary btn-sm">查看详情</p>
                     <hr>
                 </div>
             </div>
@@ -48,11 +48,12 @@
                     <h5>单据编号: {{deal.poNo}}</h5>
                     <h5>单据类型: {{deal.poTypeName}}</h5>
                     <h5>项目: {{deal.projectName}}</h5>
-                    <h5>金额: {{deal.amount}} 元</h5>
+                    <h5>金额: {{deal.amount|NumFormat}} 元</h5>
                     <h5>审核状态: <span class="label label-success">{{deal.stateName}}</span></h5>
+                    <h5>审核时间： {{deal.auditorPassAt}}</h5>
                     <h5>申请时间： {{deal.proposerDate}}</h5>
                     <h5>申请人: {{deal.proposer}}</h5>
-                    <p @click="detail(deal.id,deal.poId,deal.projectName,deal.state)" class="btn btn-primary btn-sm">查看详情</p>
+                    <p @click="detail(deal.id,deal.poId,deal.projectId,deal.poType,deal.poId,deal.projectName,deal.state)" class="btn btn-primary btn-sm">查看详情</p>
                     <hr>
                 </div>
             </div>
@@ -84,6 +85,24 @@
         })
     });
 
+    Vue.filter('NumFormat', function(num) {
+        var number = (num || 0).toString(), result = "";
+        var numStr = number.split(".", 2);
+        var integerPart = numStr[0];
+        var decimalPart = numStr[1];
+        while (integerPart.length > 3) {
+            result = "," + integerPart.slice(-3) + result;
+            integerPart = integerPart.slice(0, integerPart.length - 3);
+        }
+        if (integerPart) {
+            result = integerPart + result;
+        }
+        if (decimalPart) {
+            result = result + "." + decimalPart.substring(0, 2);//小数点保留两位精度
+        }
+        return result;
+    });
+
     const vm = new Vue({
         el: '#app',
         data: {
@@ -107,29 +126,44 @@
                         console.log(error);
                     })
             },
-            detail(id, payId,projectName, state) {
-                if (state === 100) {
-                    if (projectName.indexOf("代发") !== -1){
-                        $.cookie('handledPayId', payId);
-                        window.location.href = this.domain + "pay/portal/handledSubstituteOrderDetail";
-                    }else {
-                        $.cookie('handledPayId', payId);
-                        window.location.href = this.domain + "pay/portal/handledSaleOrderDetail";
+            detail(id, poId,projectId,poType,payId,projectName, state) {
+                if (poType === 1) {
+                    if (state === 100) {
+                        $.cookie('poId', poId, { expires: 7,path:'/'});
+                        $.cookie('projectId', projectId,{ expires: 7,path:'/'});
+                        window.location.href = this.domain + "purchase/portal/purchaseHandledOrderDetail";
+                    }else{
+                        $.cookie('poId', poId, { expires: 7,path:'/'});
+                        $.cookie('auditId', id,{ expires: 7,path:'/'});
+                        $.cookie('projectId', projectId,{ expires: 7,path:'/'});
+                        $.cookie('state', state,{ expires: 7,path:'/'});
+                        window.location.href = this.domain + "purchase/portal/purchaseOrderDetail";
                     }
-                } else {
-                    if (projectName.indexOf("代发") !== -1){
-                        $.cookie('payId', payId);
-                        $.cookie('auditId', id);
-                        $.cookie('state', state);
-                        window.location.href = this.domain + "pay/portal/paySubstituteDetail";
-                    }else {
-                        $.cookie('payId', payId);
-                        $.cookie('auditId', id);
-                        $.cookie('state', state);
-                        window.location.href = this.domain + "pay/portal/paySaleDetail";
-                    }
-
                 }
+                if (poType === 5) {
+                    if (state === 100) {
+                        if (projectName.indexOf("代发") !== -1){
+                            $.cookie('handledPayId', payId,{ expires: 7,path:'/'});
+                            window.location.href = this.domain + "pay/portal/handledSubstituteOrderDetail";
+                        }else {
+                            $.cookie('handledPayId', payId,{ expires: 7,path:'/'});
+                            window.location.href = this.domain + "pay/portal/handledSaleOrderDetail";
+                        }
+                    } else {
+                        if (projectName.indexOf("代发") !== -1){
+                            $.cookie('payId', payId,{ expires: 7,path:'/'});
+                            $.cookie('auditId', id,{ expires: 7,path:'/'});
+                            $.cookie('state', state,{ expires: 7,path:'/'});
+                            window.location.href = this.domain + "pay/portal/paySubstituteDetail";
+                        }else {
+                            $.cookie('payId', payId,{ expires: 7,path:'/'});
+                            $.cookie('auditId', id,{ expires: 7,path:'/'});
+                            $.cookie('state', state,{ expires: 7,path:'/'});
+                            window.location.href = this.domain + "pay/portal/paySaleDetail";
+                        }
+                    }
+                }
+
             },
             resolved() {
                 const url = this.domain + "pay/resolvedOrderList";
@@ -143,7 +177,8 @@
                     });
             }
         }
-    })
+    });
+
 
 </script>
 </body>

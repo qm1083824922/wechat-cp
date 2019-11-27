@@ -1,8 +1,11 @@
 package com.wx.cp.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -15,6 +18,9 @@ public class AuditRequestVO {
     /** 项目ID */
     private Integer projectId;
     private String projectName;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime auditorPassAt;
 
     /** 供应商ID */
     private Integer supplierId;

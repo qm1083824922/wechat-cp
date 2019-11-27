@@ -2,11 +2,14 @@ package com.wx.cp.api;
 import org.junit.Test;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
@@ -150,6 +153,12 @@ public class HttpAPI {
         CurrentDateTime currentDateTime = new CurrentDateTime();
         boolean wechatFlag = currentDateTime.isIswechatFlag();
         System.out.println(wechatFlag);
+
+        LocalDate of = LocalDate.of(2020, 1, 25);
+        LocalDate of1 = LocalDate.of(2021, 2, 11);
+        LocalDate now = LocalDate.now();
+        System.out.println(now.until(of, ChronoUnit.DAYS));
+        System.out.println(now.until(of1, ChronoUnit.DAYS));
     }
 
     @Test
@@ -177,10 +186,28 @@ public class HttpAPI {
 //        for (Object object : objects) {
 //            System.out.println(object);
 //        }
+        BigDecimal a = new  BigDecimal("1111111111111111111111111.1111", new MathContext(3, RoundingMode.HALF_UP));//构造BigDecimal时指定有效精度
+        System.out.println(a.toEngineeringString());//然后使用toEngineeringString
+        //需求：加入千分位.
+        DecimalFormat df = new DecimalFormat("###,###");
+        //开始格式化
+        System.out.println(df.format(1234567)); //"1,234,567"
+
+        //需求：加入千分位，保留2位小数
+        DecimalFormat df1 = new DecimalFormat("###,###.##");
+        System.out.println(df1.format(1234567.123)); //"1,234,567.12"
+        System.out.println(number(20));
     }
 
     public boolean testStr1(String str){
         return str.contains("|");
+    }
+
+    public boolean number(int number){
+        if (20 != number){
+            return true;
+        }
+        return false;
     }
 
 

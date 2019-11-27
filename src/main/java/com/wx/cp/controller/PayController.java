@@ -8,13 +8,15 @@ import com.wx.cp.constants.URLConstant;
 import com.wx.cp.pojo.TbAudit;
 import com.wx.cp.pojo.TbBaseUser;
 import com.wx.cp.utils.HttpUtil;
-import com.wx.cp.utils.PayUtil;
+import com.wx.cp.utils.StatusUtil;
+import com.wx.cp.utils.VerifyUtil;
 import com.wx.cp.utils.TokenUtil;
 import com.wx.cp.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,13 +25,9 @@ import org.springframework.web.client.RestTemplate;
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static com.wx.cp.constants.StatusConstant.INT_0;
-import static com.wx.cp.constants.StatusConstant.INT_5;
+import static com.wx.cp.constants.StatusConstant.*;
 
 /**
  * @author dell
@@ -42,11 +40,13 @@ public class PayController {
     @Autowired
     private RestTemplate restTemplate;
     @Autowired
+    private StringRedisTemplate redisTemplate;
+    @Autowired
     private TokenUtil tokenUtil;
     @Autowired
     private HttpUtil httpUtil;
     @Autowired
-    private PayUtil payUtil;
+    private VerifyUtil payUtil;
 
     /**
      * 待审核的单据
@@ -64,6 +64,7 @@ public class PayController {
                 pageVO.setOpenid(openid);
                 pageVO.setPoType(INT_5);
                 pageVO.setAuditorState(INT_0);
+                pageVO.setWechatFlag(true);
                 log.info("pageVO={}", pageVO);
                 String response = httpUtil.postByDefault(pageVO, url);
                 log.info("response={}", JSONObject.parseObject(response));
@@ -74,7 +75,7 @@ public class PayController {
                     List<WaitingVerifyOrderVO> waitingVerifyOrderVOS = JSON.parseArray(items, WaitingVerifyOrderVO.class);
                     ArrayList<WaitingVerifyOrderVO> list = new ArrayList<>();
                     for (WaitingVerifyOrderVO waitingVerifyOrderVO : waitingVerifyOrderVOS) {
-                        if (INT_5 == waitingVerifyOrderVO.getPoType()) {
+                        if (INT_5 == waitingVerifyOrderVO.getPoType() || INT_1 == waitingVerifyOrderVO.getPoType()) {
                             list.add(waitingVerifyOrderVO);
                         }
                     }
@@ -96,7 +97,7 @@ public class PayController {
     public ServerResponse<List<AuditResponseVO>> payOrderQuery(HttpServletRequest request) {
         try {
             String openid = tokenUtil.getToken(request);
-//            String openid = "YaoShunGeng";
+//            String openid = "YueYi";
             if (StringUtils.isNotBlank(openid)) {
                 AuditRequestVO auditRequestVO = new AuditRequestVO();
                 auditRequestVO.setOpenid(openid);
@@ -121,18 +122,14 @@ public class PayController {
                         for (TbAudit audit : newTbAudits) {
                             AuditResponseVO auditResponseVO = new AuditResponseVO();
                             BeanUtils.copyProperties(audit,auditResponseVO);
-                            auditResponseVO.setPoTypeName(StatusConstant.AUDIT_POTYPE_5);
+                            auditResponseVO.setPoTypeName(StatusUtil.getPoType(audit.getPoType()));
                             auditRequestVO.setAuditorId(null);
                             auditRequestVO.setId(audit.getProjectId());
-                            String res = httpUtil.postByDefault(auditRequestVO,URLConstant.GET_PROJECT);
-                            if (StringUtils.isNotBlank(res)) {
-                                BaseProjectVO baseProjectVO = JSON.parseObject(res, BaseProjectVO.class);
-                                auditResponseVO.setProjectName(baseProjectVO.getFullName());
-                            }
                             auditResponseVO.setStateName(StatusConstant.AUDIT_STATE_100);
                             auditResponseVO.setState(StatusConstant.INT_100);
                             auditResponseVO.setProposerDate(audit.getProposerAt());
                             auditResponseVO.setProposer(audit.getProposer());
+                            auditRequestVO.setAuditorPassAt(audit.getAuditorPassAt());
                             auditResponseVOList.add(auditResponseVO);
                         }
                         return ServerResponse.createBySuccess(auditResponseVOList);
@@ -230,76 +227,4 @@ public class PayController {
         }
         return ServerResponse.createBySuccess();
     }
-
-    /**
-     * 审核记录
-     */
-    @RequestMapping(value = "/auditRecords", method = {RequestMethod.GET, RequestMethod.POST})
-    public ServerResponse<ResultVO<AuditFlowsVO>> auditRecords(AuditVO auditVO) {
-        ResultVO<AuditFlowsVO> auditFlowsVO = new ResultVO<>();
-        try {
-            String url = URLConstant.PAY_ORDER_AUDIT + auditVO.getProjectItemId();
-            log.info("url={}", url);
-            String response = restTemplate.getForObject(url, String.class);
-            log.info("审核记录,response={}", JSONObject.parseObject(response));
-            if (StringUtils.isNotBlank(response)) {
-                JSONObject jsonObject = (JSONObject) JSONObject.parse(response);
-                String items = jsonObject.getString(URLConstant.RETURN_ITEMS);
-                log.info("审核记录,items={}", jsonObject.getString(URLConstant.RETURN_ITEMS));
-                List<AuditFlowsVO> auditFlowsVOS = JSON.parseArray(items, AuditFlowsVO.class);
-                auditFlowsVO.setItems(auditFlowsVOS);
-                return ServerResponse.createBySuccess(auditFlowsVO);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return ServerResponse.createBySuccess(auditFlowsVO);
-    }
-
-    /**
-     * 审核
-     *
-     * @param request
-     * @param auditVO
-     * @return
-     */
-    @RequestMapping(value = "/verifyPass", method = {RequestMethod.GET, RequestMethod.POST})
-    public ServerResponse<ResultVO<AuditFlowsVO>> verifyPass(HttpServletRequest request, AuditVO auditVO) {
-        try {
-            String openid = tokenUtil.getToken(request);
-//            String openid = "YaoShunGeng";
-            if (StringUtils.isNotBlank(openid)) {
-                auditVO.setOpenid(openid);
-                String agreedUrl = URLConstant.PAY_ORDER_BOSS_AUDIT;
-                log.info("agreedUrl={}", agreedUrl);
-                String refuseUrl = URLConstant.PAY_ORDER_UNPASS_AUDIT;
-                log.info("refuseUrl={}", refuseUrl);
-                if (1 == auditVO.getOperation()) {
-                    log.info("auditVO={}", auditVO);
-                    String response = payUtil.verify(auditVO);
-                    log.info("审核通过,response={}", JSONObject.parseObject(response));
-                    if (StringUtils.isNotBlank(response)) {
-                        JSONObject jsonObject = (JSONObject) JSONObject.parse(response);
-                        String message = jsonObject.getString(URLConstant.RETURN_MSG);
-                        return ServerResponse.createBySuccessMessage(message);
-                    }
-                } else {
-                    String response = httpUtil.postByDefault(auditVO, refuseUrl);
-                    log.info("审核拒绝,response={}", JSONObject.parseObject(response));
-                    if (StringUtils.isNotBlank(response)) {
-                        JSONObject jsonObject = (JSONObject) JSONObject.parse(response);
-                        String message = jsonObject.getString(URLConstant.RETURN_MSG);
-                        return ServerResponse.createBySuccessMessage(message);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return ServerResponse.createBySuccess();
-    }
-
-
-
-
 }

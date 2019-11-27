@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="../../static/css/element-ui/index.css">
+</head>
+<body>
+<div id="app">
+    <template>
+        <el-date-picker
+            v-model="value1"
+            align="right"
+            type="date"
+            placeholder="选择日期"
+            :picker-options="pickerOptions">
+        </el-date-picker>
+        <el-input
+            size="large"
+            v-model="value2"
+            placeholder="请输入内容"
+            suffix-icon="el-icon-date"
+             style="width: 220px">
+        </el-input>
+        <el-button type="primary" icon="el-icon-download" @click="exportExcel">导出数据</el-button>
+        <el-table
+            ref="singleTable"
+            :data="tableData"
+            border
+            highlight-current-row
+            id="out-table"
+            style="width: 100%">
+            <el-table-column type="index" label="序号" width="50"></el-table-column>
+            <el-table-column property="billNo" label="订单编号" header-align="center"></el-table-column>
+            <el-table-column property="billInType" label="入库类型" align="center" header-align="center">
+                <template slot-scope="scope">
+                    <span>{{scope.row.billInType | formatBillInType}}</span>
+                </template>
+            </el-table-column>
+            <el-table-column property="billOutType" label="出库类型" align="center" header-align="center">
+                <template slot-scope="scope">
+                    <span>{{scope.row.billOutType | formatBillOutType}}</span>
+                </template>
+            </el-table-column>
+            <el-table-column property="projectName" label="项目" header-align="center"></el-table-column>
+            <el-table-column property="receiveSendDate" label="收发货日期" width="110" header-align="center"></el-table-column>
+            <el-table-column property="statusName" label="状态" width="70" header-align="center"></el-table-column>
+            <el-table-column property="delivererAcceptor" label="出入库人" width="80" align="center" header-align="center"></el-table-column>
+            <el-table-column property="deliverAcceptTime" label="出入库时间" width="110" header-align="center"></el-table-column>
+            <el-table-column property="creator" label="创建人" width="80" align="center" header-align="center"></el-table-column>
+            <el-table-column property="createAt" label="创建时间" width="110" header-align="center"></el-table-column>
+            <el-table-column property="number" label="商品编码" header-align="center"></el-table-column>
+            <el-table-column property="barCode" label="商品国际码" header-align="center"></el-table-column>
+            <el-table-column property="specification" label="商品规格" align="center" header-align="center"></el-table-column>
+            <el-table-column property="receiveSendNum" label="收发货数量" align="center" header-align="center"></el-table-column>
+            <el-table-column property="pickupTallyNum" label="拣理货数量" align="center" header-align="center"></el-table-column>
+            <el-table-column property="receiveSendPrice" label="收发货单价" align="center" header-align="center"></el-table-column>
+            <el-table-column property="receiveSendAmount" :formatter="stateFormat" label="收发货金额" align="center" header-align="center"></el-table-column>
+            <el-table-column property="poAmount" :formatter="stateFormat" label="订单金额" align="center" header-align="center"></el-table-column>
+            <el-table-column property="costAmount" :formatter="stateFormat" label="成本金额" align="center" header-align="center"></el-table-column>
+        </el-table>
+    </template>
+</div>
+</body>
+<!-- import Vue before Element -->
+<script src="../../static/js/vue.min.js"></script>
+<!-- import JavaScript -->
+<script src="../../static/js/index.js"></script>
+<script lang="javascript" src="../../static/js/xlsx.full.min.js"></script>
+<!--<script lang="javascript" src="../../static/js/FileSaver.min.js"></script>-->
+<script lang="javascript" src="../../static/js/FileSaver.js"></script>
+<script>
+    const vm = new Vue({
+        el: '#app',
+        data() {
+            return {
+                value1: '',
+                value2: '',
+                input3: '',
+                input4: '',
+                pickerOptions: {
+                    disabledDate(time) {
+                        return time.getTime() > Date.now();
+                    },
+                    shortcuts: [{
+                        text: '今天',
+                        onClick(picker) {
+                            picker.$emit('pick', new Date());
+                        }
+                    }, {
+                        text: '昨天',
+                        onClick(picker) {
+                            const date = new Date();
+                            date.setTime(date.getTime() - 3600 * 1000 * 24);
+                            picker.$emit('pick', date);
+                        }
+                    }, {
+                        text: '一周前',
+                        onClick(picker) {
+                            const date = new Date();
+                            date.setTime(date.getTime() - 3600 * 1000 * 24 * 7);
+                            picker.$emit('pick', date);
+                        }
+                    }]
+                },
+                tableData: [
+                    {
+                        "billNo": "OU19091900004",
+                        "billInType": -1,
+                        "billOutType": 1,
+                        "projectName": "山东五粮液",
+                        "receiveSendDate": "2019-09-19",
+                        "status": 5,
+                        "statusName": "已发货",
+                        "delivererAcceptor": "李明芳",
+                        "deliverAcceptTime": "2019-09-20 14:03:18.0",
+                        "creator": "李明芳",
+                        "createAt": "2019-09-19 11:07:41.0",
+                        "number": "P000001603",
+                        "barCode": "6901382065226",
+                        "specification": "500ml",
+                        "receiveSendNum": 180,
+                        "pickupTallyNum": 180,
+                        "receiveSendPrice": 624,
+                        "receiveSendAmount": 112320,
+                        "poAmount": 107100,
+                        "costAmount": 107100
+                    },
+                    {
+                        "billNo": "OU19091900005",
+                        "billInType": -1,
+                        "billOutType": 1,
+                        "projectName": "山东五粮液",
+                        "receiveSendDate": "2019-09-19",
+                        "status": 5,
+                        "statusName": "已发货",
+                        "delivererAcceptor": "李明芳",
+                        "deliverAcceptTime": "2019-09-20 14:03:15.0",
+                        "creator": "李明芳",
+                        "createAt": "2019-09-19 15:37:13.0",
+                        "number": "P000001603",
+                        "barCode": "6901382065226",
+                        "specification": "500ml",
+                        "receiveSendNum": 120,
+                        "pickupTallyNum": 120,
+                        "receiveSendPrice": 624,
+                        "receiveSendAmount": 74880,
+                        "poAmount": 71400,
+                        "costAmount": 71400
+                    },
+                    {
+                        "billNo": "OU19092000002",
+                        "billInType": -1,
+                        "billOutType": 1,
+                        "projectName": "山东五粮液",
+                        "receiveSendDate": "2019-09-20",
+                        "status": 5,
+                        "statusName": "已发货",
+                        "delivererAcceptor": "李明芳",
+                        "deliverAcceptTime": "2019-09-24 16:12:20.0",
+                        "creator": "李明芳",
+                        "createAt": "2019-09-20 13:14:54.0",
+                        "number": "P000001603",
+                        "barCode": "6901382065226",
+                        "specification": "500ml",
+                        "receiveSendNum": 120,
+                        "pickupTallyNum": 120,
+                        "receiveSendPrice": 624,
+                        "receiveSendAmount": 74880,
+                        "poAmount": 71400,
+                        "costAmount": 71400
+                    },
+                    {
+                        "billNo": "OU19092300001",
+                        "billInType": -1,
+                        "billOutType": 1,
+                        "projectName": "山东五粮液",
+                        "receiveSendDate": "2019-09-23",
+                        "status": 5,
+                        "statusName": "已发货",
+                        "delivererAcceptor": "李明芳",
+                        "deliverAcceptTime": "2019-09-24 16:12:23.0",
+                        "creator": "李明芳",
+                        "createAt": "2019-09-23 11:29:34.0",
+                        "number": "P000001603",
+                        "barCode": "6901382065226",
+                        "specification": "500ml",
+                        "receiveSendNum": 420,
+                        "pickupTallyNum": 420,
+                        "receiveSendPrice": 624,
+                        "receiveSendAmount": 262080,
+                        "poAmount": 249900,
+                        "costAmount": 249900
+                    },
+                    {
+                        "billNo": "OU19092400003",
+                        "billInType": -1,
+                        "billOutType": 1,
+                        "projectName": "山东五粮液",
+                        "receiveSendDate": "2019-09-24",
+                        "status": 5,
+                        "statusName": "已发货",
+                        "delivererAcceptor": "李明芳",
+                        "deliverAcceptTime": "2019-09-25 13:55:08.0",
+                        "creator": "李明芳",
+                        "createAt": "2019-09-24 16:14:44.0",
+                        "number": "P000001603",
+                        "barCode": "6901382065226",
+                        "specification": "500ml",
+                        "receiveSendNum": 180,
+                        "pickupTallyNum": 180,
+                        "receiveSendPrice": 624,
+                        "receiveSendAmount": 112320,
+                        "poAmount": 107100,
+                        "costAmount": 107100
+                    },
+                    {
+                        "billNo": "OU19092500001",
+                        "billInType": -1,
+                        "billOutType": 1,
+                        "projectName": "山东五粮液",
+                        "receiveSendDate": "2019-09-25",
+                        "status": 5,
+                        "statusName": "已发货",
+                        "delivererAcceptor": "李明芳",
+                        "deliverAcceptTime": "2019-09-26 10:42:00.0",
+                        "creator": "李明芳",
+                        "createAt": "2019-09-25 11:24:02.0",
+                        "number": "P000001603",
+                        "barCode": "6901382065226",
+                        "specification": "500ml",
+                        "receiveSendNum": 300,
+                        "pickupTallyNum": 300,
+                        "receiveSendPrice": 624,
+                        "receiveSendAmount": 187200,
+                        "poAmount": 178500,
+                        "costAmount": 178500
+                    },
+                    {
+                        "billNo": "OU19092600001",
+                        "billInType": -1,
+                        "billOutType": 1,
+                        "projectName": "山东五粮液",
+                        "receiveSendDate": "2019-09-26",
+                        "status": 5,
+                        "statusName": "已发货",
+                        "delivererAcceptor": "李明芳",
+                        "deliverAcceptTime": "2019-09-29 14:49:55.0",
+                        "creator": "李明芳",
+                        "createAt": "2019-09-26 10:41:47.0",
+                        "number": "P000001603",
+                        "barCode": "6901382065226",
+                        "specification": "500ml",
+                        "receiveSendNum": 60,
+                        "pickupTallyNum": 60,
+                        "receiveSendPrice": 601,
+                        "receiveSendAmount": 36060,
+                        "poAmount": 35700,
+                        "costAmount": 35700
+                    },
+                    {
+                        "billNo": "OU19092900005",
+                        "billInType": -1,
+                        "billOutType": 1,
+                        "projectName": "山东五粮液",
+                        "receiveSendDate": "2019-09-27",
+                        "status": 5,
+                        "statusName": "已发货",
+                        "delivererAcceptor": "李明芳",
+                        "deliverAcceptTime": "2019-10-03 15:26:09.0",
+                        "creator": "李明芳",
+                        "createAt": "2019-09-29 15:04:16.0",
+                        "number": "P000001603",
+                        "barCode": "6901382065226",
+                        "specification": "500ml",
+                        "receiveSendNum": 3120,
+                        "pickupTallyNum": 3120,
+                        "receiveSendPrice": 601,
+                        "receiveSendAmount": 1875120,
+                        "poAmount": 1856400,
+                        "costAmount": 1856400
+                    },
+                    {
+                        "billNo": "OU19102200008",
+                        "billInType": -1,
+                        "billOutType": 1,
+                        "projectName": "山东五粮液",
+                        "receiveSendDate": "2019-10-22",
+                        "status": 5,
+                        "statusName": "已发货",
+                        "delivererAcceptor": "李明芳",
+                        "deliverAcceptTime": "2019-10-24 11:45:28.0",
+                        "creator": "李明芳",
+                        "createAt": "2019-10-22 16:41:52.0",
+                        "number": "P000001603",
+                        "barCode": "6901382065226",
+                        "specification": "500ml",
+                        "receiveSendNum": 60,
+                        "pickupTallyNum": 60,
+                        "receiveSendPrice": 601,
+                        "receiveSendAmount": 36060,
+                        "poAmount": 35700,
+                        "costAmount": 35700
+                    },
+                    {
+                        "billNo": "OU19102400002",
+                        "billInType": -1,
+                        "billOutType": 1,
+                        "projectName": "山东五粮液",
+                        "receiveSendDate": "2019-10-24",
+                        "status": 5,
+                        "statusName": "已发货",
+                        "delivererAcceptor": "李明芳",
+                        "deliverAcceptTime": "2019-10-24 16:06:50.0",
+                        "creator": "李明芳",
+                        "createAt": "2019-10-24 16:05:56.0",
+                        "number": "P000001603",
+                        "barCode": "6901382065226",
+                        "specification": "500ml",
+                        "receiveSendNum": 60,
+                        "pickupTallyNum": 60,
+                        "receiveSendPrice": 601,
+                        "receiveSendAmount": 36060,
+                        "poAmount": 35700,
+                        "costAmount": 35700
+                    },
+                    {
+                        "billNo": "OU19102400003",
+                        "billInType": -1,
+                        "billOutType": 1,
+                        "projectName": "山东五粮液",
+                        "receiveSendDate": "2019-10-23",
+                        "status": 5,
+                        "statusName": "已发货",
+                        "delivererAcceptor": "李明芳",
+                        "deliverAcceptTime": "2019-10-24 16:07:17.0",
+                        "creator": "李明芳",
+                        "createAt": "2019-10-24 16:06:03.0",
+                        "number": "P000001603",
+                        "barCode": "6901382065226",
+                        "specification": "500ml",
+                        "receiveSendNum": 60,
+                        "pickupTallyNum": 60,
+                        "receiveSendPrice": 601,
+                        "receiveSendAmount": 36060,
+                        "poAmount": 35700,
+                        "costAmount": 35700
+                    },
+                    {
+                        "billNo": "IN19091900001",
+                        "billInType": 1,
+                        "billOutType": -1,
+                        "projectName": "山东五粮液",
+                        "receiveSendDate": "2019-09-18",
+                        "status": 2,
+                        "statusName": "已收货",
+                        "delivererAcceptor": "李明芳",
+                        "deliverAcceptTime": "2019-09-19 10:36:10.0",
+                        "creator": "李明芳",
+                        "createAt": "2019-09-19 10:33:42.0",
+                        "number": "P000001603",
+                        "barCode": "6901382065226",
+                        "specification": "500ml",
+                        "receiveSendNum": 180,
+                        "pickupTallyNum": 180,
+                        "receiveSendPrice": 595,
+                        "receiveSendAmount": 107100,
+                        "poAmount": 107100,
+                        "costAmount": 107100
+                    },
+                    {
+                        "billNo": "IN19091900002",
+                        "billInType": 1,
+                        "billOutType": -1,
+                        "projectName": "山东五粮液",
+                        "receiveSendDate": "2019-09-19",
+                        "status": 2,
+                        "statusName": "已收货",
+                        "delivererAcceptor": "李明芳",
+                        "deliverAcceptTime": "2019-09-19 15:36:20.0",
+                        "creator": "李明芳",
+                        "createAt": "2019-09-19 15:33:05.0",
+                        "number": "P000001603",
+                        "barCode": "6901382065226",
+                        "specification": "500ml",
+                        "receiveSendNum": 120,
+                        "pickupTallyNum": 120,
+                        "receiveSendPrice": 595,
+                        "receiveSendAmount": 71400,
+                        "poAmount": 71400,
+                        "costAmount": 71400
+                    },
+                    {
+                        "billNo": "IN19092000003",
+                        "billInType": 1,
+                        "billOutType": -1,
+                        "projectName": "山东五粮液",
+                        "receiveSendDate": "2019-09-20",
+                        "status": 2,
+                        "statusName": "已收货",
+                        "delivererAcceptor": "李明芳",
+                        "deliverAcceptTime": "2019-09-20 13:12:39.0",
+                        "creator": "李明芳",
+                        "createAt": "2019-09-20 13:07:50.0",
+                        "number": "P000001603",
+                        "barCode": "6901382065226",
+                        "specification": "500ml",
+                        "receiveSendNum": 120,
+                        "pickupTallyNum": 120,
+                        "receiveSendPrice": 595,
+                        "receiveSendAmount": 71400,
+                        "poAmount": 71400,
+                        "costAmount": 71400
+                    },
+                    {
+                        "billNo": "IN19092300001",
+                        "billInType": 1,
+                        "billOutType": -1,
+                        "projectName": "山东五粮液",
+                        "receiveSendDate": "2019-09-23",
+                        "status": 2,
+                        "statusName": "已收货",
+                        "delivererAcceptor": "李明芳",
+                        "deliverAcceptTime": "2019-09-23 11:20:43.0",
+                        "creator": "李明芳",
+                        "createAt": "2019-09-23 11:18:56.0",
+                        "number": "P000001603",
+                        "barCode": "6901382065226",
+                        "specification": "500ml",
+                        "receiveSendNum": 420,
+                        "pickupTallyNum": 420,
+                        "receiveSendPrice": 595,
+                        "receiveSendAmount": 249900,
+                        "poAmount": 249900,
+                        "costAmount": 249900
+                    },
+                    {
+                        "billNo": "IN19092400009",
+                        "billInType": 1,
+                        "billOutType": -1,
+                        "projectName": "山东五粮液",
+                        "receiveSendDate": "2019-09-24",
+                        "status": 2,
+                        "statusName": "已收货",
+                        "delivererAcceptor": "李明芳",
+                        "deliverAcceptTime": "2019-09-24 16:09:29.0",
+                        "creator": "李明芳",
+                        "createAt": "2019-09-24 16:08:35.0",
+                        "number": "P000001603",
+                        "barCode": "6901382065226",
+                        "specification": "500ml",
+                        "receiveSendNum": 180,
+                        "pickupTallyNum": 180,
+                        "receiveSendPrice": 595,
+                        "receiveSendAmount": 107100,
+                        "poAmount": 107100,
+                        "costAmount": 107100
+                    },
+                    {
+                        "billNo": "IN19092500001",
+                        "billInType": 1,
+                        "billOutType": -1,
+                        "projectName": "山东五粮液",
+                        "receiveSendDate": "2019-09-25",
+                        "status": 2,
+                        "statusName": "已收货",
+                        "delivererAcceptor": "李明芳",
+                        "deliverAcceptTime": "2019-09-25 00:00:00.0",
+                        "creator": "李明芳",
+                        "createAt": "2019-09-25 00:00:00.0",
+                        "number": "P000001603",
+                        "barCode": "6901382065226",
+                        "specification": "500ml",
+                        "receiveSendNum": 300,
+                        "pickupTallyNum": 300,
+                        "receiveSendPrice": 595,
+                        "receiveSendAmount": 178500,
+                        "poAmount": 178500,
+                        "costAmount": 178500
+                    },
+                    {
+                        "billNo": "IN19092600001",
+                        "billInType": 1,
+                        "billOutType": -1,
+                        "projectName": "山东五粮液",
+                        "receiveSendDate": "2019-09-26",
+                        "status": 2,
+                        "statusName": "已收货",
+                        "delivererAcceptor": "李明芳",
+                        "deliverAcceptTime": "2019-09-26 10:39:45.0",
+                        "creator": "李明芳",
+                        "createAt": "2019-09-26 10:37:51.0",
+                        "number": "P000001603",
+                        "barCode": "6901382065226",
+                        "specification": "500ml",
+                        "receiveSendNum": 60,
+                        "pickupTallyNum": 60,
+                        "receiveSendPrice": 595,
+                        "receiveSendAmount": 35700,
+                        "poAmount": 35700,
+                        "costAmount": 35700
+                    },
+                    {
+                        "billNo": "IN19092700002",
+                        "billInType": 1,
+                        "billOutType": -1,
+                        "projectName": "山东五粮液",
+                        "receiveSendDate": "2019-09-19",
+                        "status": 2,
+                        "statusName": "已收货",
+                        "delivererAcceptor": "李明芳",
+                        "deliverAcceptTime": "2019-09-29 14:48:47.0",
+                        "creator": "李明芳",
+                        "createAt": "2019-09-27 17:11:19.0",
+                        "number": "P000001603",
+                        "barCode": "6901382065226",
+                        "specification": "500ml",
+                        "receiveSendNum": 3120,
+                        "pickupTallyNum": 3120,
+                        "receiveSendPrice": 595,
+                        "receiveSendAmount": 1856400,
+                        "poAmount": 1856400,
+                        "costAmount": 1856400
+                    },
+                    {
+                        "billNo": "IN19102200004",
+                        "billInType": 1,
+                        "billOutType": -1,
+                        "projectName": "山东五粮液",
+                        "receiveSendDate": "2019-10-22",
+                        "status": 2,
+                        "statusName": "已收货",
+                        "delivererAcceptor": "李明芳",
+                        "deliverAcceptTime": "2019-10-22 15:55:03.0",
+                        "creator": "李明芳",
+                        "createAt": "2019-10-22 15:52:49.0",
+                        "number": "P000001603",
+                        "barCode": "6901382065226",
+                        "specification": "500ml",
+                        "receiveSendNum": 2352,
+                        "pickupTallyNum": 2352,
+                        "receiveSendPrice": 595,
+                        "receiveSendAmount": 1399440,
+                        "poAmount": 1399440,
+                        "costAmount": 1399440
+                    }
+                ]
+            }
+        },
+        methods : {
+            stateFormat(row, column, cellValue) {
+                cellValue += '';
+                if (!cellValue.includes('.')) cellValue += '.';
+                return cellValue.replace(/(\d)(?=(\d{3})+\.)/g, function ($0, $1) {
+                    return $1 + ',';
+                }).replace(/\.$/, '');
+            },
+            mounted(){
+
+            },
+            handleClick(row) {
+                console.log(row.city);
+            },
+            //定义导出Excel表格事件
+            exportExcel() {
+                /* 从表生成工作簿对象 */
+                var wb = XLSX.utils.table_to_book(document.querySelector("#out-table"));
+                /* 获取二进制字符串作为输出 */
+                var wbout = XLSX.write(wb, {
+                    bookType: "xlsx",
+                    bookSST: true,
+                    type: "array"
+                });
+                try {
+                    FileSaver.saveAs(
+                        //Blob 对象表示一个不可变、原始数据的类文件对象。
+                        //Blob 表示的不一定是JavaScript原生格式的数据。
+                        //File 接口基于Blob，继承了 blob 的功能并将其扩展使其支持用户系统上的文件。
+                        //返回一个新创建的 Blob 对象，其内容由参数中给定的数组串联组成。
+                        new Blob([wbout], { type: "application/octet-stream" }),
+                        //设置导出文件名称
+                        "sheetjs.xlsx"
+                    );
+                } catch (e) {
+                    if (typeof console !== "undefined") console.log(e, wbout);
+                }
+                return wbout;
+            }
+        },
+        filters: {
+            // 状态过滤
+            formatStatus(value) {
+                if (value === 1) {
+                   return  '费用单'
+                }else if (value === 2){
+                    return '入库单'
+                }else if (value === 3){
+                    return '出库单'
+                }else if (value === 4){
+                    return '付款单'
+                }else if (value === 5){
+                    return '收票单'
+                }else if (value === 6){
+                    return '开票单'
+                }else if (value === 7){
+                    return '水单'
+                }else if (value === 8){
+                    return '采购单'
+                }else{
+                    return '销售折扣单'
+                }
+            },
+            formatBillInType(value){
+                if(value === -1){
+                    return '-'
+                }
+                if (value === 1) {
+                    return "采购";
+                }
+                if (value === 2) {
+                    return "调拨";
+                }
+                if (value === 3) {
+                    return "销售退货";
+                }
+                if (value === 4) {
+                    return "其他入库";
+                }
+                if (value === 5) {
+                    return "成本调整";
+                }
+            },
+            formatBillOutType(value){
+                if(value === -1){
+                    return '-'
+                }
+                if (value === 1) {
+                    return "销售";
+                }
+                if (value === 2) {
+                    return "调拨";
+                }
+                if (value === 3) {
+                    return "借货";
+                }
+                if (value === 4) {
+                    return "还货";
+                }
+                if (value === 5) {
+                    return "采购退货";
+                }
+                if (value === 6) {
+                    return "内部销售";
+                }
+                if (value === 7) {
+                    return "其他出库";
+                }
+                if (value === 8) {
+                    return "成本调整";
+                }
+            }
+        }
+    })
+</script>
+</html>

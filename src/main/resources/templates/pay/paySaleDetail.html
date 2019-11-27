@@ -22,9 +22,6 @@
             margin-left: 20px;
             margin-right: 20px;
         }
-        #payPoRelationDetail{
-            font-size: 25px;
-        }
         #agree,#refuse{
             font-size: 25px;
             margin-top: 20px;
@@ -62,7 +59,7 @@
         v-if="seen"
         show-summary
         style="width: 100%; margin-top: 10px">
-        <el-table-column prop="id" label="ID"></el-table-column>
+        <el-table-column prop="id"  type="index"  label="序号" width="60"></el-table-column>
         <el-table-column prop="barCode" label="商品国际码"></el-table-column>
         <el-table-column prop="goodsName" label="商品名称"></el-table-column>
         <el-table-column prop="unit" label="商品单位"></el-table-column>
@@ -173,10 +170,11 @@
                 window.location.href = "payAdvanceDetail.html";
             },
             auditRecords() {
-                const url = this.domain + "pay/auditRecords";
+                const url = this.domain + "wechat/auditRecords";
                 axios.get(url, {
                     params: {
-                        projectItemId: $.cookie('payId')
+                        projectItemId: $.cookie('payId'),
+                        poType:5
                     }
                 })
                     .then((response) => {
@@ -197,7 +195,7 @@
                     });
                     return false;
                 }
-                const url = this.domain + "pay/verifyPass";
+                const url = this.domain + "verify/pass";
                 axios.get(url, {
                     params: {
                         auditId: $.cookie('auditId'),
@@ -227,7 +225,7 @@
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
-                    const url = this.domain + "pay/verifyPass";
+                    const url = this.domain + "verify/pass";
                     axios.get(url, {
                         params: {
                             auditId: $.cookie('auditId'),
@@ -263,7 +261,7 @@
                 const sums = [];
                 columns.forEach((column, index) => {
                     if (index === 0) {
-                        sums[index] = '总价';
+                        sums[index] = '合计';
                         return;
                     }
                     const values = data.map(item => Number(item[column.property]));

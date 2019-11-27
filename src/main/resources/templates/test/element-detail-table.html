@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+<body>
+<div id="app">
+    <template>
+        <el-table
+            :data="tableData.slice((currentPage-1) * pagesize,currentPage * pagesize)"
+            ref="singleTable"
+            highlight-current-row
+            border
+            style="width: 100%">
+            <el-table-column type="index" label="序号" width="50" ></el-table-column>
+            <el-table-column prop="projectName" label="项目"></el-table-column>
+            <el-table-column prop="warehouseName" label="仓库"></el-table-column>
+            <el-table-column prop="goodsType" label="商品分类"></el-table-column>
+            <el-table-column prop="brand" label="商品品牌"></el-table-column>
+            <el-table-column prop="goodsNo" label="商品编码"></el-table-column>
+            <el-table-column prop="goodsName" label="商品描述"></el-table-column>
+            <el-table-column prop="sumStore" label="总库存"></el-table-column>
+            <el-table-column prop="sumLock" label="锁定库存"></el-table-column>
+            <el-table-column prop="sumNotLock" label="未锁定库存"></el-table-column>
+            <el-table-column prop="sumNum" label="总数量"></el-table-column>
+            <el-table-column prop="sumLockNum" label="锁定数量"></el-table-column>
+            <el-table-column prop="sumNotLockNum" label="未锁定数量"></el-table-column>
+            <el-table-column prop="inLibraryCount1" label="(0,20)天库龄数量"></el-table-column>
+            <el-table-column prop="inLibraryAmount1" label="(0,20)天库龄金额"></el-table-column>
+            <el-table-column prop="inLibraryCount2" label="[20,60)天库龄数量"></el-table-column>
+            <el-table-column prop="inLibraryAmount2" label="[20,60)天库龄金额"></el-table-column>
+            <el-table-column prop="inLibraryCount3" label="[60,+∞)天库龄数量"></el-table-column>
+            <el-table-column prop="inLibraryAmount3" label="[60,+∞)天库龄金额"></el-table-column>
+            <el-table-column prop="dateOfExpiryCount1" label="(0,⅓)效期内数量"></el-table-column>
+            <el-table-column prop="dateOfExpiryAmount1" label="(0,⅓)效期内金额"></el-table-column>
+            <el-table-column prop="dateOfExpiryCount2" label="[⅓,½)效期内数量"></el-table-column>
+            <el-table-column prop="dateOfExpiryAmount2" label="[⅓,½)效期内金额"></el-table-column>
+            <el-table-column prop="dateOfExpiryCount3" label="[½,+∞)效期内数量"></el-table-column>
+            <el-table-column prop="dateOfExpiryAmount3" label="[½,+∞)效期内金额"></el-table-column>
+        </el-table>
+        <el-pagination
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="currentPage"
+            :page-sizes="[5, 10, 20, 40]"
+            :page-size="pagesize"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="tableData.length">
+        </el-pagination>
+    </template>
+</div>
+</body>
+<!-- import Vue before Element -->
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<!-- import JavaScript -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                currentPage:1, //初始页
+                pagesize:10,    //    每页的数据
+                tableData: [
+                    {
+                        departmentName: '深圳阿斯特网络科技有限公司',
+                        projectName: '6001.11-美妆分销',
+                        warehouseName: '普陀区',
+                        goodsType: '美妆',
+                        brand: '兰蔻',
+                        goodsNo: 'P100001038',
+                        goodsName: '兰蔻新精华肌底液',
+                        sumStore: '1',
+                        sumLock: '0.00',
+                        sumNotLock: '1',
+                        sumNum: '4639',
+                        sumLockNum: '0',
+                        sumNotLockNum: '4639',
+                        inLibraryCount1: '0.00',
+                        inLibraryAmount1: '0.00',
+                        inLibraryCount2: '0.00',
+                        inLibraryAmount2: '0.00',
+                        inLibraryCount3: '1',
+                        inLibraryAmount3: '1006.40',
+                        dateOfExpiryCount1: '0.00',
+                        dateOfExpiryAmount1: '0.00',
+                        dateOfExpiryCount2: '0.00',
+                        dateOfExpiryAmount2: '0.00',
+                        dateOfExpiryCount3: '1',
+                        dateOfExpiryAmount3: '1006.40',
+                    },
+                    {
+                        departmentName: '深圳阿斯特网络科技有限公司',
+                        projectName: '6001.11-美妆分销',
+                        warehouseName: '普陀区',
+                        goodsType: '美妆',
+                        brand: '兰蔻',
+                        goodsNo: 'P100001038',
+                        goodsName: '兰蔻新精华肌底液',
+                        sumStore: '1',
+                        sumLock: '0.00',
+                        sumNotLock: '1',
+                        sumNum: '4639',
+                        sumLockNum: '0',
+                        sumNotLockNum: '4639',
+                        inLibraryCount1: '0.00',
+                        inLibraryAmount1: '0.00',
+                        inLibraryCount2: '0.00',
+                        inLibraryAmount2: '0.00',
+                        inLibraryCount3: '1',
+                        inLibraryAmount3: '1006.40',
+                        dateOfExpiryCount1: '0.00',
+                        dateOfExpiryAmount1: '0.00',
+                        dateOfExpiryCount2: '0.00',
+                        dateOfExpiryAmount2: '0.00',
+                        dateOfExpiryCount3: '1',
+                        dateOfExpiryAmount3: '1006.40',
+                    }
+                ],
+            }
+        },
+        mounted(){
+            // this.handleUserList();
+        },
+        methods : {
+            // 初始页currentPage、初始每页数据数pagesize和数据data
+            handleSizeChange: function (size) {
+                this.pagesize = size;
+                console.log(this.pagesize)  //每页下拉显示数据
+            },
+            handleCurrentChange: function(currentPage){
+                this.currentPage = currentPage;
+                console.log(this.currentPage)  //点击第几页
+            },
+            handleList(){
+                const url = 'http://localhost:8080/user/getUser';
+                axios.get(url, {
+                    params: {
+                        firstName: this.form.name,
+                        lastName: this.form.region
+                    }
+                })
+                    .then(response => {
+                        console.log(response);
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+            },
+        }
+    })
+</script>
+</html>

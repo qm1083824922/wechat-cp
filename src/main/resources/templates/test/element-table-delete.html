@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>实现删除与批量删除</title>
+</head>
+<body>
+<div id="app">
+    <template>
+        <!-- 表格内容 -->
+        <el-table :data="packData"
+                  border style="width: 100%"
+                  ref="multipleTable"
+                  @selection-change="handleSelectionChange">
+            <el-table-column type="selection" width="55"></el-table-column>
+            <el-table-column prop="PackingId" label="包装编号" width="120"></el-table-column>
+            <el-table-column prop="PackingName" label="包装名称" width="120"></el-table-column>
+            <el-table-column prop="PackingPrice" label="包装价格" width="120"></el-table-column>
+            <el-table-column prop="PackingImage" label="包装图片"></el-table-column>
+            <el-table-column label="操作" width="180">
+                <template slot-scope="scope">
+                    <el-button size="small" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+                    <el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+
+        <!-- 删除提示框 -->
+        <el-dialog title="提示" :visible.sync="delVisible" width="300px" center>
+            <div class="del-dialog-cnt">删除不可恢复，是否确定删除？</div>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="delVisible = false">取 消</el-button>
+                <el-button type="primary" @click="deleteRow">确 定</el-button>
+            </span>
+        </el-dialog>
+    </template>
+</div>
+
+<script>
+
+    export default {
+        name: 'pack',
+        data() {
+            return {
+                packData: [],
+                deleteVisible: false,//删除提示弹框的状态
+                msg: "",//记录每一条的信息，便于取id
+                delarr: [],//存放删除的数据
+                multipleSelection: [],//多选的数据
+            }
+        },
+
+        methods: {
+            // 获取数据,这里只简单展示数据，最好可以把当前页面，每页显示数据，搜索等参数传值到后台，因为删除会影响分页和数据
+            getPackData() {
+                this.$axios.post('/api/selectPackPageMade.do').then((response) => {
+                    this.packData = response.data;
+                }).catch(function (error) {
+                    console.log(error);
+                })
+            },
+
+            //单行删除
+            handleDelete(index, row) {
+                this.idx = index;
+                this.msg = row;//每一条数据的记录
+                this.delarr.push(this.msg.PackingId);//把单行删除的每条数据的id添加进放删除数据的数组
+                this.deleteVisible = true;
+            },
+
+            //批量删除
+            delAll() {
+                this.deleteVisible = true;//显示删除弹框
+                const length = this.multipleSelection.length;
+                for (let i = 0; i < length; i++) {
+                    this.delarr.push(this.multipleSelection[i].PackingId)
+                }
+            },
+
+            //操作多选
+            handleSelectionChange(value) {
+                this.multipleSelection = value;
+            },
+
+            // 确定删除
+            deleteRow() {
+                this.$axios.get("/api/delPackTotalMade.do", {
+                    params: {
+                        delarr: this.delarr
+                    }
+                }).then(response => {
+                    if (response.data == "包装删除成功") {
+                        this.getPackData();
+                        this.$message.success('删除成功')
+                    }
+                }).catch(error => {
+                    console.log(error);
+                    this.$message.error('包装删除失败')
+                });
+                this.deleteVisible = false;//关闭删除提示模态框
+            },
+        }
+    }
+
+</script>
+</body>
+</html>

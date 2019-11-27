@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <!-- jquery -->
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+    <!-- popper.js 不知道有啥用 没有又不行-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" ></script>
+
+    <!-- bootstrap -->
+    <link href="https://cdn.bootcss.com/twitter-bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+    <!-- bootstrap-table -->
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.15.3/dist/bootstrap-table.min.css">
+    <script src="https://unpkg.com/bootstrap-table@1.15.3/dist/bootstrap-table.min.js"></script>
+
+    <!-- 导出功能的js文件 -->
+    <script src="../../../static/js/bootstrap-table-export.js"></script>
+    <script src="../../../static/js/tableExport.js"></script>
+</head>
+<body>
+<table id="table">
+</table>
+<script>
+
+    $(function(){
+        $('#table').bootstrapTable({
+            columns: [{
+                field: 'id',
+                title: 'Item ID'
+            }, {
+                field: 'name',
+                title: 'Item Name'
+            }, {
+                field: 'price',
+                title: 'Item Price'
+            }],
+            data: [{
+                id: 1,
+                name: 'Item 1',
+                price: '$1'
+            }, {
+                id: 2,
+                name: 'Item 2',
+                price: '$2'
+            }]
+        })
+    });
+</script>
+</body>
+</html>

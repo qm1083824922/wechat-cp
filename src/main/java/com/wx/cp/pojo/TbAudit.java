@@ -57,6 +57,7 @@ public class TbAudit extends BaseEntity {
      * 项目ID
      */
     private Integer projectId;
+    private String projectName;
 
     /**
      * 供应商ID

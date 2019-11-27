@@ -35,7 +35,6 @@ public class TokenUtil {
         if (cookie == null) {
             log.warn("【登录校验】Cookie中查不到token");
         }
-
         //去redis里查询
         String token = null;
         if (cookie != null) {

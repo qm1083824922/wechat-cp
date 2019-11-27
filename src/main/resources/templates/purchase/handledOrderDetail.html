@@ -7,16 +7,28 @@
     <link href="../../static/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../../static/css/element-ui/index.css">
     <style>
-        h1, h4 {
+        h1,h4{
             color: #606266;
         }
-
         #top,#middle{
             margin-left: 20px;
             margin-right: 20px;
         }
-        .el-table {
-            overflow: visible !important;
+        #foot{
+            margin-bottom: 10px;
+        }
+        #suggestion{
+            margin-top: 20px;
+            margin-left: 20px;
+            margin-right: 20px;
+        }
+        #agree,#refuse{
+            font-size: 25px;
+            margin-top: 20px;
+            margin-left: 230px;
+        }
+        .el-table{
+            overflow:visible !important;
             font-size: 17px;
         }
     </style>
@@ -25,41 +37,44 @@
 <div id="app">
     <div id="top">
         <div>
-            <h2>付款单详情</h2>
-            <h4>付款编号: {{payOrder.payNo}}</h4>
-            <h4>项目: {{payOrder.projectName}}</h4>
-            <h4>收款经营单位: {{payOrder.payeeName}}</h4>
-            <h4>付款金额: {{payOrder.payAmountString}} 元</h4>
-            <h4>预收金额: {{payOrder.advanceAmount}} 元</h4>
-            <h4>备注: {{payOrder.remark}}</h4>
+            <h2>采购订单详情</h2>
+            <h4>订单编号: {{purchaseOrder.orderNo}}</h4>
+            <h4>项目: {{purchaseOrder.projectName}}</h4>
+            <h4>供应商: {{purchaseOrder.supplierName}}</h4>
+            <h4>收货仓库: {{purchaseOrder.warehouseName}}</h4>
+            <h4>客户: {{purchaseOrder.customerName}}</h4>
+            <h4>订单日期: {{purchaseOrder.orderTime}}</h4>
+            <h4>预计到货日期: {{purchaseOrder.perdictTime}}</h4>
+            <h4>订单数量: {{purchaseOrder.orderTotalNum}}</h4>
+            <h4>订单金额: {{purchaseOrder.orderTotalAmount}}</h4>
         </div>
         <hr>
 
-        <el-button type="primary" style="font-size: 18px" icon="el-icon-reading" v-if='flag==true' @click='payPoRelationDetail'>付款订单明细</el-button>
-        <el-button type="primary" style="font-size: 18px" icon="el-icon-notebook-1" v-if='flag==false' @click='payPoRelationDetail'>付款订单明细</el-button>
+        <el-button type="primary" style="font-size: 18px" icon="el-icon-reading" v-if='flag==true' @click='orderDetail'>采购订单明细</el-button>
+        <el-button type="primary" style="font-size: 18px" icon="el-icon-notebook-1" v-if='flag==false' @click='orderDetail'>采购订单明细</el-button>
 
     </div>
 
     <el-table
-        :data="payPoOrderDetail"
+        :data="purchaseOrderDetail"
         border
         :summary-method="getSummaries"
         v-if="seen"
         show-summary
         style="width: 100%; margin-top: 10px">
         <el-table-column prop="id" type="index" label="序号" width="60"></el-table-column>
+        <el-table-column prop="goodsNo" label="商品编号"></el-table-column>
         <el-table-column prop="barCode" label="商品国际码"></el-table-column>
+        <el-table-column prop="brand" label="商品品牌"></el-table-column>
         <el-table-column prop="goodsName" label="商品名称"></el-table-column>
         <el-table-column prop="unit" label="商品单位"></el-table-column>
         <el-table-column prop="goodsNum" label="采购数量"></el-table-column>
         <el-table-column prop="goodsPrice" label="采购单价(元)"></el-table-column>
-        <el-table-column prop="requiredSendPrice" label="销售单价(元)"></el-table-column>
-        <el-table-column prop="goodsAmount" label="采购金额(元)"></el-table-column>
-        <el-table-column prop="arrivalAmount" label="销售金额(元)"></el-table-column>
-        <el-table-column prop="payAmount" label="本次付款金额(元)"></el-table-column>
-        <el-table-column prop="discountRateStr" label="折扣率"></el-table-column>
-        <el-table-column prop="grossProfitRateStr" label="毛利率"></el-table-column>
+        <el-table-column prop="arrivalNum" label="收货数量"></el-table-column>
+        <el-table-column prop="arrivalAmount" label="收货金额(元)"></el-table-column>
+        <el-table-column prop="goodsAmount" label="金额(元)"></el-table-column>
     </el-table>
+
     <div id="middle">
         <h2>审核记录</h2>
         <div v-for="record in verifyRecords">
@@ -86,13 +101,14 @@
         el: '#app',
         data() {
             return {
-                flag: true,
+                flag:true,
                 auditId: '',
                 payId: '',
                 suggestion: '',
-                payOrder: {},
+                state: '',
+                purchaseOrder: {},
                 verifyRecords: [],
-                payPoOrderDetail: [],
+                purchaseOrderDetail: [],
                 seen: false,
                 // domain: 'http://localhost:9090/'
                 // domain: 'http://devwx.asters.cn/'
@@ -105,53 +121,35 @@
         },
         methods: {
             list() {
-                const url = this.domain + "pay/payOrderDetail";
+                const url = this.domain + "purchase/purchaseOrder";
                 axios.get(url, {
                     params: {
-                        payId: $.cookie('handledPayId')
+                        poId: $.cookie('poId')
                     }
                 })
-                    .then((response) => {
-                        console.log(response);
-                        this.payOrder = response.data.data.payOrderResDto;
-                        console.log(this.payOrder);
+                    .then(response => {
+                        this.purchaseOrder = response.data.data.purchaseOrderVO;
+                        this.purchaseOrderDetail = response.data.data.purchaseOrderDetailVOList;
                     })
-                    .catch((error) => {
+                    .catch(error => {
                         console.log(error);
                     });
             },
-            payPoRelationDetail() {
+            orderDetail() {
                 this.flag = !this.flag;
-                if (this.flag == true) {
-                    this.seen = false;
-                } else if (this.flag == false) {
+                if(this.flag==true){
+                    this.seen=false;
+                }else if(this.flag==false){
                     this.seen = true;
                 }
-                const url = this.domain + "pay/payPoRelationDetail";
-                axios.get(url, {
-                    params: {
-                        payId: $.cookie('handledPayId')
-                    }
-                })
-                    .then((response) => {
-                        console.log(response);
-                        this.payPoOrderDetail = response.data.data.payPoRelationResDto;
-                        console.log(this.payOrderDetail);
-                    })
-                    .catch((error) => {
-                        console.log(error);
-                    })
-            },
-            payAdvanceDetail() {
-                //跳转单据详情页面
-                window.location.href = "payAdvanceDetail.html";
             },
             auditRecords() {
                 const url = this.domain + "wechat/auditRecords";
                 axios.get(url, {
                     params: {
-                        projectItemId: $.cookie('handledPayId'),
-                        poType:5
+                        poId: $.cookie('poId'),
+                        projectId: $.cookie('projectId'),
+                        poType:1
                     }
                 })
                     .then((response) => {
@@ -164,7 +162,7 @@
                     });
             },
             getSummaries(param) {
-                const {columns, data} = param;
+                const { columns, data } = param;
                 const sums = [];
                 columns.forEach((column, index) => {
                     if (index === 0) {
@@ -182,22 +180,23 @@
                             }
                         }, 0);
                         const flag = true;
-                        if (index === 1 || index ===3) {
+                        if (index === 1 || index===3){
                             sums[index] = ''
                         }else if (index===4){
                             sums[index] += ''
-                        } else if (flag) {
-                            sums[index] = parseFloat(sums[index]).toFixed(2) + ' 元';
+                        }
+                        else if (flag){
+                            sums[index] = parseFloat(sums[index]).toFixed(2) + '';
                         }
                     } else {
                         sums[index] = '';
                     }
                 });
-                sums[11] = this.payOrder.totalGrossRate;
+                sums[2] = '';
                 return sums;
             }
-
         }
     })
 </script>
+
 </html>

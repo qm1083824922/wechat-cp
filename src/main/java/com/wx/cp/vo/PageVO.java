@@ -13,5 +13,6 @@ public class PageVO {
     private int pageSize = 25;
     private String openid;
     private Integer poType;
+    private boolean wechatFlag;
     private Integer auditorState;
 }

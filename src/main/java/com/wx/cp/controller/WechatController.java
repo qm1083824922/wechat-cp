@@ -7,13 +7,14 @@ import com.wx.cp.common.ServerResponse;
 import com.wx.cp.config.WxCpConfiguration;
 import com.wx.cp.config.WxCpProperties;
 import com.wx.cp.constants.URLConstant;
-import com.wx.cp.pojo.TbBaseUser;
 import com.wx.cp.utils.DateFormatterUtil;
 import com.wx.cp.utils.HttpUtil;
 import com.wx.cp.utils.StatusUtil;
 import com.wx.cp.utils.TokenUtil;
-import com.wx.cp.vo.AuditRequestVO;
+import com.wx.cp.vo.AuditFlowsVO;
+import com.wx.cp.vo.AuditVO;
 import com.wx.cp.vo.PayOrderVO;
+import com.wx.cp.vo.ResultVO;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.api.WxConsts;
 import me.chanjar.weixin.common.error.WxErrorException;
@@ -143,26 +144,49 @@ public class WechatController {
     }
 
     /**
+     * 发送通知文本消息
+     * @param applicantId
+     * @param poType
+     * @return
+     */
+    @GetMapping("/sendMessage/{applicantId}/{poType}")
+    @ResponseBody
+    public ServerResponse sendMessageText(@PathVariable("applicantId") String applicantId,
+                                          @PathVariable("poType") Integer poType) {
+        try {
+            if (StringUtils.isNotBlank(applicantId)){
+                WxCpProperties.AppConfig appConfig = wxCpProperties.getAppConfigs().get(0);
+                Integer agentId = appConfig.getAgentId();
+                final WxCpService wxService = WxCpConfiguration.getCpService(agentId);
+                WxCpMessage message = WxCpMessage
+                    .TEXT()
+                    .toUser(applicantId)
+                    .content("您提交的" + StatusUtil.getPoType(poType) + "已经审核完成")
+                    .build();
+                wxService.messageSend(message);
+                return ServerResponse.createBySuccess();
+            }
+        }catch (WxErrorException e){
+            e.printStackTrace();
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.ERROR.getCode(),"服务器异常,稍后重试");
+        }
+        return ServerResponse.createBySuccess();
+
+    }
+
+    /**
      * 发送图文消息
      * 确定发送审核的类型
      */
     @GetMapping("/sendMessageTextCard/{userId}/{status}/{poType}")
     @ResponseBody
-    public ServerResponse sendMessageTextCard(@PathVariable("userId") Integer userId,
+    public ServerResponse sendMessageTextCard(@PathVariable("userId") String userId,
                                               @PathVariable("status") Integer status,
                                               @PathVariable("poType") Integer poType){
         log.info("userId={},status={},poType={}",userId,status,poType);
         try {
-            AuditRequestVO auditRequestVO = new AuditRequestVO();
-            auditRequestVO.setId(userId);
-            String response = httpUtil.postByDefault(auditRequestVO,URLConstant.GET_USER);
-            TbBaseUser tbBaseUser = JSON.parseObject(response, TbBaseUser.class);
-            String openid = null;
-            if (tbBaseUser != null) {
-                openid = tbBaseUser.getOpenid();
-            }
-            if (StringUtils.isNotBlank(openid)) {
-                String url = wxCpProperties.getProjectUrl() + URLConstant.AUTHROIZE_TEST_DOMAIN;
+            if (StringUtils.isNotBlank(userId) && Objects.nonNull(status) && Objects.nonNull(poType) ) {
+                String url = wxCpProperties.getProjectUrl() + URLConstant.WAITING_ORDER_LIST;
                 WxCpProperties.AppConfig appConfig = wxCpProperties.getAppConfigs().get(0);
                 Integer agentId = appConfig.getAgentId();
                 final WxCpService wxCpService = WxCpConfiguration.getCpService(agentId);
@@ -170,7 +194,7 @@ public class WechatController {
                 String orderType = StatusUtil.getPoType(poType);
                 WxCpMessage message = WxCpMessage
                     .TEXTCARD()
-                    .toUser(openid)
+                    .toUser(userId)
                     .btnTxt("更多")
                     .description("<div class=\"gray\">" + DateFormatterUtil.dateFormat() + "</div> <div class=\"normal\">" + auditStatus + "通知</div>")
                     .url(url)
@@ -183,7 +207,9 @@ public class WechatController {
                         int errcode = Integer.parseInt(jsonObject.getString("errcode"));
                         //发送成功
                         if (errcode == 0) {
-                            log.info("发送企业微信通知成功");
+                            log.info("发送企业微信" + orderType + "通知成功");
+                        }else {
+                            //发送审核通知失败，通知给自己
                         }
                     }
                 } catch (WxErrorException e) {
@@ -226,5 +252,39 @@ public class WechatController {
         } catch (WxErrorException e) {
             e.printStackTrace();
         }
+    }
+
+
+    /**
+     * 审核记录
+     */
+    @RequestMapping(value = "/auditRecords", method = {RequestMethod.GET, RequestMethod.POST})
+    @ResponseBody
+    public ServerResponse<ResultVO<AuditFlowsVO>> auditRecords(AuditVO auditVO) {
+        ResultVO<AuditFlowsVO> auditFlowsVO = new ResultVO<>();
+        try {
+            Integer poType = auditVO.getPoType();
+            String url = null;
+            if (poType == 5){
+                url = URLConstant.PAY_ORDER_AUDIT + auditVO.getProjectItemId();
+            }
+            if (poType == 1 ){
+                url = URLConstant.PURCHASE_AUDIT_RECORDS + auditVO.getPoId() + "/" + auditVO.getProjectId();
+            }
+            log.info("url={}", url);
+            String response = restTemplate.getForObject(url, String.class);
+            log.info("审核记录,response={}", JSONObject.parseObject(response));
+            if (StringUtils.isNotBlank(response)) {
+                JSONObject jsonObject = (JSONObject) JSONObject.parse(response);
+                String items = jsonObject.getString(URLConstant.RETURN_ITEMS);
+                log.info("审核记录,items={}", jsonObject.getString(URLConstant.RETURN_ITEMS));
+                List<AuditFlowsVO> auditFlowsVOS = JSON.parseArray(items, AuditFlowsVO.class);
+                auditFlowsVO.setItems(auditFlowsVOS);
+                return ServerResponse.createBySuccess(auditFlowsVO);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ServerResponse.createBySuccess(auditFlowsVO);
     }
 }

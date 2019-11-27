@@ -22,12 +22,15 @@ public class AuditVO{
     private String openid;
     @ApiModelProperty(value = "付款ID")
     private String payId;
-    @ApiModelProperty(value = "创建时间")
+    @ApiModelProperty(value = "审核操作")
     private int operation;
     @ApiModelProperty(value = "状态")
     private Integer state;
     @ApiModelProperty(value = "用户ID")
     private Integer userId;
+    @ApiModelProperty(value = "poId")
+    private Integer poId;
     @ApiModelProperty(value = "单据类型")
     private Integer poType;
+    private Integer projectId;
 }

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Hello, Bootstrap Table!</title>
+
+    <!-- jquery -->
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+    <!-- popper.js 不知道有啥用 没有又不行-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" ></script>
+
+    <!-- bootstrap -->
+    <link href="https://cdn.bootcss.com/twitter-bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+    <!-- bootstrap-table -->
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.15.3/dist/bootstrap-table.min.css">
+    <script src="https://unpkg.com/bootstrap-table@1.15.3/dist/bootstrap-table.min.js"></script>
+
+    <!-- 导出功能的js文件 -->
+    <script src="../../static/js/bootstrap-table-export.js"></script>
+    <script src="../../static/js/tableExport.js"></script>
+
+</head>
+<body>
+<table id="table" style="width: 400px">
+
+</table>
+
+<script>
+    $('#table').bootstrapTable({
+        classes: 'table  table-hover table-striped table-responsive',
+        data:[{"id":1,"name":"张三","age":18},{"id":2,"name":"李四","age":20}],
+        columns: [
+            {
+                field: 'id',
+                title: '序号',
+                align: 'center',
+            },
+            {
+                field: 'name',
+                title: '姓名',
+                align: 'center',
+            },
+            {
+                field: 'age',
+                title: '年龄',
+                align: 'center',
+            },
+        ],
+
+        showExport: true,      //是否显示导出
+        exportDataType: "all",
+        exportTypes:['excel'],  //导出文件类型
+        Icons:'glyphicon-export',
+        exportOptions:{
+            ignoreColumn: [0,12],  //忽略某一列的索引
+            fileName: '导出表格',  //文件名称设置
+            worksheetName: 'sheet1',  //表格工作区名称
+            tableName: '导出表格',
+            onMsoNumberFormat: doOnMsoNumberFormat,
+            onCellHtmlData: DoOnCellHtmlData,
+        },
+    });
+    function doOnMsoNumberFormat(cell, row, col){
+        var result = "";
+        if (row > 0 && col == 0){
+            result = "\\@";
+        }
+        return result;
+    }
+    //处理导出内容,这个方法可以自定义某一行、某一列、甚至某个单元格的内容,也就是将其值设置为自己想要的内容
+    function DoOnCellHtmlData(cell, row, col, data){
+        if(row == 0){
+            return data;
+        }
+
+        //由于备注列超过6个字的话,通过span标签处理只显示前面6个字,如果直接导出的话会导致内容不完整,因此要将携带完整内容的span标签中title属性的值替换
+        if(col == 4 || col ==11 || col == 7){
+            var spanObj = $(data);//将带 <span title="val"></span> 标签的字符串转换为jQuery对象
+            var title = spanObj.attr("title");//读取<span title="val"></span>中title属性的值
+            //var span = cell[0].firstElementChild;//读取cell数组中的第一个值下的第一个元素
+            if(typeof(title) != 'undefined'){
+                return title;
+            }
+        }
+
+        return data;
+    }
+</script>
+
+</body>
+</html>

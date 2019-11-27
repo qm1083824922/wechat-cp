@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -44,7 +46,20 @@ public class InventoryReportController {
         JSONObject jsonObject = JSONObject.parseObject(response);
         String items = jsonObject.getString(URLConstant.RETURN_ITEMS);
         List<StockReportVO> stockReportVOList = JSONObject.parseArray(items, StockReportVO.class);
-        return ServerResponse.createBySuccess(stockReportVOList);
+        List<StockReportVO> stockReportVOS = new ArrayList<>();
+        for (StockReportVO stockReportVO : stockReportVOList) {
+            stockReportVO.setSumStore(stockReportVO.getSumStore().setScale(0, BigDecimal.ROUND_UP));
+            stockReportVO.setSumLock(stockReportVO.getSumStore().setScale(0, BigDecimal.ROUND_UP));
+            stockReportVO.setSumNotLock(stockReportVO.getSumNotLock().setScale(0, BigDecimal.ROUND_UP));
+            stockReportVO.setInLibraryAmount1(stockReportVO.getInLibraryAmount1().setScale(0, BigDecimal.ROUND_UP));
+            stockReportVO.setInLibraryAmount2(stockReportVO.getInLibraryAmount2().setScale(0, BigDecimal.ROUND_UP));
+            stockReportVO.setInLibraryAmount3(stockReportVO.getInLibraryAmount3().setScale(0, BigDecimal.ROUND_UP));
+            stockReportVO.setDateOfExpiryAmount1(stockReportVO.getDateOfExpiryAmount1().setScale(0, BigDecimal.ROUND_UP));
+            stockReportVO.setDateOfExpiryAmount2(stockReportVO.getDateOfExpiryAmount2().setScale(0, BigDecimal.ROUND_UP));
+            stockReportVO.setDateOfExpiryAmount3(stockReportVO.getDateOfExpiryAmount3().setScale(0, BigDecimal.ROUND_UP));
+            stockReportVOS.add(stockReportVO);
+        }
+        return ServerResponse.createBySuccess(stockReportVOS);
 
     }
 

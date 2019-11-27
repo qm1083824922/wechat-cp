@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.15.3/dist/bootstrap-table.min.css">
+    <style>
+        .select,
+        #locale {
+            width: 100%;
+        }
+        .like {
+            margin-right: 10px;
+        }
+    </style>
+
+</head>
+<body>
+<table
+    id="table"
+    data-toolbar="#toolbar"
+    data-show-refresh="true"
+    data-show-toggle="true"
+    data-show-columns="true"
+    data-show-columns-toggle-all="true"
+    data-show-export="true"
+    data-click-to-select="true"
+    data-minimum-count-columns="2"
+    data-show-pagination-switch="true"
+    data-pagination="true"
+    data-page-list="[10, 25, 50, 100, all]"
+    data-show-footer="true"
+    data-url="http://localhost:8080/scfs/wechat/PurchaseSale/goodDetail"
+    data-side-pagination="server"
+    data-response-handler="responseHandler">
+</table>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/tableexport.jquery.plugin/tableExport.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.15.3/dist/bootstrap-table.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap-table/1.15.4/locale/bootstrap-table-zh-CN.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.15.5/dist/extensions/export/bootstrap-table-export.min.js"></script>
+<script>
+    var $table = $('#table');
+    var tableData = [];
+    var $remove = $('#remove');
+    var selections = [];
+
+    function getIdSelections() {
+        return $.map($table.bootstrapTable('getSelections'), function (row) {
+            return row.id
+        })
+    }
+
+    function responseHandler(res) {
+        $.each(res.rows, function (i, row) {
+            row.state = $.inArray(row.id, selections) !== -1
+        });
+        return res
+    }
+
+    function detailFormatter(index, row) {
+        var html = [];
+        $.each(row, function (key, value) {
+            html.push('<p><b>' + key + ':</b> ' + value + '</p>')
+        });
+        return html.join('')
+    }
+
+    function operateFormatter(value, row, index) {
+        return [
+            '<a class="like" href="javascript:void(0)" title="Like">',
+            '<i class="fa fa-heart">收藏</i>',
+            '</a>  ',
+            '<a class="remove" href="javascript:void(0)" title="Remove">',
+            '<i class="fa fa-trash">删除</i>',
+            '</a>'
+        ].join('')
+    }
+
+    window.operateEvents = {
+        'click .like': function (e, value, row, index) {
+            alert('You click like action, row: ' + JSON.stringify(row))
+        },
+        'click .remove': function (e, value, row, index) {
+            $table.bootstrapTable('remove', {
+                field: 'id',
+                values: [row.id]
+            })
+        }
+    };
+
+    function totalTextFormatter(data) {
+        return 'Total'
+    }
+
+    function totalNameFormatter(data) {
+        return data.length
+    }
+
+    function totalPriceFormatter(data) {
+        var field = this.field;
+        return '$' + data.map(function (row) {
+            return +row[field].substring(1)
+        }).reduce(function (sum, i) {
+            return sum + i
+        }, 0)
+    }
+
+    function billInTypeFormatter(value) {
+        if (value === 1) {
+            return "采购";
+        }
+        if (value === 2) {
+            return "调拨";
+        }
+        if (value === 3) {
+            return "销售退货";
+        }
+        if (value === 4) {
+            return "其他入库";
+        }
+        if (value === 5) {
+            return "成本调整";
+        }
+    }
+
+    function billOutTypeFormatter(value) {
+        if (value === 1) {
+            return "销售";
+        }
+        if (value === 2) {
+            return "调拨";
+        }
+        if (value === 3) {
+            return "借货";
+        }
+        if (value === 4) {
+            return "还货";
+        }
+        if (value === 5) {
+            return "采购退货";
+        }
+        if (value === 6) {
+            return "内部销售";
+        }
+        if (value === 7) {
+            return "其他出库";
+        }
+        if (value === 8) {
+            return "成本调整";
+        }
+    }
+
+    function initTable() {
+        $table.bootstrapTable('destroy').bootstrapTable({
+            height: 550,
+            data: tableData,
+            columns: [
+                [{
+                    title: '序号',
+                    field: 'id',
+                    align: 'center',
+                    valign: 'middle',
+                    sortable: true,
+                },{
+                    field: 'billNo',
+                    title: '订单编号',
+                    sortable: true,
+                    align: 'center'
+                }, {
+                    field: 'billInType',
+                    title: '入库类型',
+                    sortable: true,
+                    footerFormatter: billInTypeFormatter,
+                    align: 'center'
+                }, {
+                    field: 'billOutType',
+                    title: '出库类型',
+                    sortable: true,
+                    align: 'center',
+                    footerFormatter: billOutTypeFormatter
+                },{
+                    field: 'projectName',
+                    title: '项目',
+                    sortable: true,
+                    align: 'center'
+                }, {
+                    field: 'receiveSendDate',
+                    title: '收发货日期',
+                    sortable: true,
+                    align: 'center',
+                },{
+                    field: 'statusName',
+                    title: '状态',
+                    sortable: true,
+                    align: 'center'
+                }, {
+                    field: 'delivererAcceptor',
+                    title: '出入库人',
+                    sortable: true,
+                    align: 'center',
+                },{
+                    field: 'deliverAcceptTime',
+                    title: '出入库时间',
+                    sortable: true,
+                    align: 'center'
+                }, {
+                    field: 'creator',
+                    title: '创建人',
+                    sortable: true,
+                    align: 'center',
+                },{
+                    field: 'createAt',
+                    title: '创建时间',
+                    sortable: true,
+                    align: 'center'
+                }, {
+                    field: 'number',
+                    title: '商品编号',
+                    sortable: true,
+                    align: 'center',
+                },{
+                    field: 'barCode',
+                    title: '商品国际码',
+                    sortable: true,
+                    align: 'center'
+                }, {
+                    field: 'specification',
+                    title: '商品规格',
+                    sortable: true,
+                    align: 'center',
+                },{
+                    field: 'receiveSendNum',
+                    title: '收发货数量',
+                    sortable: true,
+                    align: 'center'
+                }, {
+                    field: 'pickupTallyNum',
+                    title: '拣理货数量',
+                    sortable: true,
+                    align: 'center',
+                },{
+                    field: 'receiveSendPrice',
+                    title: '收发货单价',
+                    sortable: true,
+                    align: 'center'
+                }, {
+                    field: 'receiveSendAmount',
+                    title: '收发货金额',
+                    sortable: true,
+                    align: 'center',
+                },{
+                    field: 'poAmount',
+                    title: '订单金额',
+                    sortable: true,
+                    align: 'center'
+                }, {
+                    field: 'costAmount',
+                    title: '成本金额',
+                    sortable: true,
+                    align: 'center',
+                },]
+            ]
+        });
+        $table.on('check.bs.table uncheck.bs.table ' +
+            'check-all.bs.table uncheck-all.bs.table',
+            function () {
+                $remove.prop('disabled', !$table.bootstrapTable('getSelections').length);
+
+                // save your data, here just save the current page
+                selections = getIdSelections()
+                // push or splice the selections if you want to save all data selections
+            });
+        $table.on('all.bs.table', function (e, name, args) {
+            console.log(name, args)
+        });
+        $remove.click(function () {
+            var ids = getIdSelections();
+            $table.bootstrapTable('remove', {
+                field: 'id',
+                values: ids
+            });
+            $remove.prop('disabled', true)
+        })
+    }
+    $(function() {
+        // $.ajax({
+        //     type: 'POST',
+        //     url : 'http://localhost:8080/scfs/wechat/PurchaseSale/goodDetail',
+        //     dataType : 'json',
+        //     success : function(data){
+        //         alert(data);
+        //         if (data) {
+        //             console.log(data);
+        //             // tableData = data.rows;
+        //         }
+        //     },
+        //     error:function(data){
+        //         console.error(data);
+        //         alert("新增失败");
+        //     }
+        // });
+        initTable();
+    })
+</script>
+</body>
+</html>
