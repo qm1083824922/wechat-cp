@@ -149,7 +149,6 @@
                     this.seen = true;
                 }
                 const url = this.domain + "pay/payPoRelationDetail";
-                console.log($.cookie('payId'));
                 axios.get(url, {
                     params: {
                         payId: $.cookie('payId')
@@ -196,14 +195,13 @@
                     return false;
                 }
                 const url = this.domain + "verify/pass";
-                axios.get(url, {
-                    params: {
-                        auditId: $.cookie('auditId'),
-                        projectItemId: $.cookie('payId'),
-                        suggestion: this.suggestion,
-                        operation: 1,
-                        state: $.cookie('state')
-                    }
+                axios.post(url, {
+                    auditId: $.cookie('auditId'),
+                    projectItemId: $.cookie('payId'),
+                    suggestion: this.suggestion,
+                    operation: 1,
+                    poType: 5,
+                    state: $.cookie('state')
                 })
                     .then((response) => {
                         window.location.href = this.domain + "pay/portal/waitingPayOrderList";

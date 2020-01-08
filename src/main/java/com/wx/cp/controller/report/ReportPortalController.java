@@ -12,9 +12,9 @@ public class ReportPortalController {
     @RequestMapping("/inventoryReportDetail")
     public String inventoryReportDetail(){ return "report/inventoryReportDetail"; }
 
-    @RequestMapping("/purchaseAndSaleReportList")
-    public String purchaseAndSaleReportList(){ return "report/purchaseAndSaleReportList"; }
+    @RequestMapping("/stockReportList")
+    public String stockReportList(){ return "report/stockReportList"; }
 
-    @RequestMapping("/purchaseAndSaleReportDetail")
-    public String purchaseAndSaleReportDetail(){ return "report/purchaseAndSaleReportDetail"; }
+    @RequestMapping("/stockReportDetail")
+    public String stockReportDetail(){ return "report/stockReportListDetail"; }
 }

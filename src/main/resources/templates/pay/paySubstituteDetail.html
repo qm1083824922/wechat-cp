@@ -69,7 +69,7 @@
         <el-table-column prop="goodsAmount" label="采购金额(元)"></el-table-column>
         <el-table-column prop="arrivalAmount" label="销售金额(元)"></el-table-column>
         <el-table-column prop="payAmount" label="本次付款金额(元)"></el-table-column>
-        <el-table-column prop="discountRateStr"  label="折扣率"></el-table-column>
+<!--        <el-table-column prop="discountRateStr"  label="折扣率"></el-table-column>-->
         <el-table-column prop="grossProfitRateStr" label="毛利率"></el-table-column>
     </el-table>
     <!--<p class="btn btn-primary btn-sm" @click="payAdvanceDetail()">付款预收明细</p>-->
@@ -152,7 +152,6 @@
                     this.seen = true;
                 }
                 const url = this.domain + "pay/payPoRelationDetail";
-                console.log($.cookie('payId'));
                 axios.get(url, {
                     params: {
                         payId: $.cookie('payId')
@@ -199,15 +198,13 @@
                     return false;
                 }
                 const url = this.domain + "verify/pass";
-                axios.get(url, {
-                    params: {
-                        auditId: $.cookie('auditId'),
-                        projectItemId: $.cookie('payId'),
-                        suggestion: this.suggestion,
-                        operation: 1,
-                        poType:5,
-                        state: $.cookie('state')
-                    }
+                axios.post(url, {
+                    auditId: $.cookie('auditId'),
+                    projectItemId: $.cookie('payId'),
+                    suggestion: this.suggestion,
+                    operation: 1,
+                    poType: 5,
+                    state: $.cookie('state')
                 })
                     .then((response) => {
                         window.location.href = this.domain + "pay/portal/waitingPayOrderList";
@@ -277,7 +274,7 @@
                         sums[index] = '';
                     }
                 });
-                sums[11] = this.payOrder.totalGrossRate;
+                sums[10] = this.payOrder.totalGrossRate;
                 return sums;
 
             }

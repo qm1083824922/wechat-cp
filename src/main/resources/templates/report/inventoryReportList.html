@@ -5,38 +5,46 @@
     <meta charset="UTF-8">
     <!-- import CSS -->
     <link rel="stylesheet" href="../../static/css/element-ui/index.css">
-    <style>
-        .el-table_1_column_4{
-            color: black;
-            font-weight: bold;
-        }
-    </style>
 </head>
 <body>
 <div id="app">
     <template>
-        <el-table :data="tableData.slice((currentPage-1) * pagesize,currentPage * pagesize)"
-                  ref="singleTable"
-                  highlight-current-row
-                  border
-                  :summary-method="getSummaries"
-                  show-summary
-                  style="width: 100%">
+        <el-table
+            :data="tableData.slice((currentPage-1) * pagesize,currentPage * pagesize)"
+            ref="singleTable"
+            highlight-current-row
+            border
+            show-summary
+            style="width: 100%">
             <el-table-column type="index" label="序号" width="50" ></el-table-column>
+<!--            <el-table-column prop="departName" label="部门"></el-table-column>-->
             <el-table-column prop="projectName" label="项目"></el-table-column>
             <el-table-column prop="businessUnitName" label="经营单位"></el-table-column>
-            <el-table-column prop="sumStore" :formatter="stateFormat" label="总库存金额"></el-table-column>
-            <el-table-column prop="sumNum" :formatter="stateFormat" label="总数量"  ></el-table-column>
-            <el-table-column prop="sumLock" :formatter="stateFormat" label="锁定库存金额"></el-table-column>
-            <el-table-column prop="sumNotLock" :formatter="stateFormat" label="未锁定库存金额"></el-table-column>
-            <el-table-column prop="sumLockNum" label="锁定数量"></el-table-column>
-            <el-table-column prop="sumNotLockNum" label="未锁定数量"></el-table-column>
-            <el-table-column prop="inLibraryAmount1" :formatter="stateFormat" label="(0,20)天库龄金额"></el-table-column>
-            <el-table-column prop="inLibraryAmount2" :formatter="stateFormat" label="[20,60)天库龄金额"></el-table-column>
-            <el-table-column prop="inLibraryAmount3" :formatter="stateFormat" label="[60,+∞)天库龄金额"></el-table-column>
-            <el-table-column prop="dateOfExpiryAmount1" :formatter="stateFormat" label="(0,⅓)效期内金额"></el-table-column>
-            <el-table-column prop="dateOfExpiryAmount2" :formatter="stateFormat" label="[⅓,½)效期内金额"></el-table-column>
-            <el-table-column prop="dateOfExpiryAmount3" :formatter="stateFormat" label="[½,+∞)效期内金额"></el-table-column>
+<!--            <el-table-column prop="wareHouseName" label="仓库"></el-table-column>-->
+            <el-table-column prop="goodsType" label="商品分类"></el-table-column>
+            <el-table-column prop="brand" label="商品品牌"></el-table-column>
+            <el-table-column prop="goodName" label="商品名称" width="130"></el-table-column>
+            <el-table-column prop="barCode" label="商品国际码" width="125"></el-table-column>
+            <el-table-column prop="number" label="商品编号" width="110"></el-table-column>
+            <el-table-column prop="specification" label="商品规格"></el-table-column>
+            <el-table-column prop="saleNum" label="本期销售数量" ></el-table-column>
+            <el-table-column prop="saleAmount" label="本期销售金额" ></el-table-column>
+            <el-table-column prop="initialNum" label="期初数量"></el-table-column>
+            <el-table-column prop="initialAmount" label="期初金额" width="110"></el-table-column>
+            <el-table-column prop="initialTaxRateAmount" label="期初金额(未税)" width="110"></el-table-column>
+            <el-table-column prop="currentInNum" label="本期入库数量" ></el-table-column>
+            <el-table-column prop="currentInAmount" label="本期入库金额" ></el-table-column>
+            <el-table-column prop="currentInTaxRateAmount" label="本期入库金额(未税)" ></el-table-column>
+            <el-table-column prop="currentOtherInNum" label="本期其他入库数量"></el-table-column>
+            <el-table-column prop="currentOtherInAmount" label="本期其他入库金额" ></el-table-column>
+            <el-table-column prop="currentOutNum" label="本期出库数量" ></el-table-column>
+            <el-table-column prop="currentOutAmount" label="本期出库金额" ></el-table-column>
+            <el-table-column prop="currentOutTaxRateAmount" label="本期出库金额(未税)" ></el-table-column>
+            <el-table-column prop="currentOtherOutNum" label="本期其他出库数量"></el-table-column>
+            <el-table-column prop="currentOtherOutAmount" label="本期其他出库金额" ></el-table-column>
+            <el-table-column prop="endNum" label="期末数量"></el-table-column>
+            <el-table-column prop="endAmount" label="期末金额" width="110"></el-table-column>
+            <el-table-column prop="endTaxRateAmount" label="期末金额(未税)" width="110"></el-table-column>
             <el-table-column fixed="right" label="操作">
                 <template slot-scope="scope">
                     <el-button @click="handleDetail(scope.row)" type="text" size="small">查看详情</el-button>
@@ -47,7 +55,7 @@
             @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
-            :page-sizes="[5, 10, 20, 40]"
+            :page-sizes="[25, 50, 100, 150]"
             :page-size="pagesize"
             layout="total, sizes, prev, pager, next, jumper"
             :total="tableData.length">
@@ -55,24 +63,25 @@
     </template>
 </div>
 </body>
-<!-- import Vue before Element -->
+<!-- jQuery (Bootstrap 的所有 JavaScript 插件都依赖 jQuery，所以必须放在前边) -->
 <script src="../../static/js/jquery.min.js"></script>
+<!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
+<script src="../../static/js/bootstrap.min.js"></script>
 <script src="../../static/js/vue.min.js"></script>
 <script src="../../static/js/axios.min.js"></script>
 <script src="../../static/js/jquery.cookie.js"></script>
-<!-- import JavaScript -->
 <script src="../../static/js/element-ui/index.js"></script>
 <script>
-    const vm = new Vue({
+    new Vue({
         el: '#app',
         data() {
             return {
                 currentPage:1, //初始页
-                pagesize:10,    //    每页的数据
+                pagesize:25,    //    每页的数据
                 tableData: [],
-                // domain: 'http://localhost:9090/'
+                domain: 'http://localhost:9090/'
                 // domain: 'http://devwx.asters.cn/'
-                domain: 'http://wx.asters.cn/'
+                // domain: 'http://wx.asters.cn/'
             }
         },
         mounted(){
@@ -88,15 +97,8 @@
                 this.currentPage = currentPage;
                 console.log(this.currentPage)  //点击第几页
             },
-            stateFormat(row, column, cellValue) {
-                cellValue += '';
-                if (!cellValue.includes('.')) cellValue += '.';
-                return cellValue.replace(/(\d)(?=(\d{3})+\.)/g, function ($0, $1) {
-                    return $1 + ',';
-                }).replace(/\.$/, '');
-            },
             handleList(){
-                const url = this.domain +'inventoryReport/list';
+                const url = this.domain + 'inventoryReport/list';
                 axios.get(url, {
                     params: {
 
@@ -110,27 +112,6 @@
                         console.log(error);
                     });
             },
-            handleDetail(row){
-                $.cookie('projectId', row.projectId);
-                window.location.href = this.domain +"report/inventoryReportDetail";
-            },
-            numberFormat(num) {
-                var number = (num || 0).toString(), result = "";
-                var numStr = number.split(".", 2);
-                var integerPart = numStr[0];
-                var decimalPart = numStr[1];
-                while (integerPart.length > 3) {
-                    result = "," + integerPart.slice(-3) + result;
-                    integerPart = integerPart.slice(0, integerPart.length - 3);
-                }
-                if (integerPart) {
-                    result = integerPart + result;
-                }
-                if (decimalPart) {
-                    result = result + "." + decimalPart.substring(0, 2);//小数点保留两位精度
-                }
-                return result;
-            },
             getSummaries(param) {
                 const { columns, data } = param;
                 const sums = [];
@@ -139,33 +120,26 @@
                         sums[index] = '合计';
                         return;
                     }
-                    const values = data.map(item => Number(item[column.property]));
-                    if (!values.every(value => isNaN(value))) {
+                    if (column.property === 'projectName' || column.property === 'businessUnitName'
+                        || column.property === 'goodsType' || column.property === 'brand' ||
+                        column.property === 'goodName' || column.property === 'barCode' ||
+                        column.property === 'barCode' || column.property === 'number' || column.property === 'specification' ){
+                        sums[index] = ''
+                    }else {
                         sums[index] = values.reduce((prev, curr) => {
                             const value = Number(curr);
                             if (!isNaN(value)) {
                                 return prev + curr;
-                            } else {
+                            }else {
                                 return prev;
                             }
                         }, 0);
-                        sums[index] += '';
-                    } else {
-                        sums[index] = '';
+                        sums[index] += ' 元';
                     }
                 });
-                sums[3] = this.numberFormat(sums[3]);
-                sums[5] = this.numberFormat(sums[5]);
-                sums[6] = this.numberFormat(sums[6]);
-                sums[9] = this.numberFormat(sums[9]);
-                sums[10] = this.numberFormat(sums[10]);
-                sums[11] = this.numberFormat(sums[11]);
-                sums[12] = this.numberFormat(sums[12]);
-                sums[13] = this.numberFormat(sums[13]);
-                sums[14] = this.numberFormat(sums[14]);
                 return sums;
             }
         }
-    });
+    })
 </script>
 </html>

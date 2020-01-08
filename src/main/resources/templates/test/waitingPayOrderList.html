@@ -108,9 +108,9 @@
         data: {
             items: [],
             dealOrderList: [],
-            // domain: 'http://localhost:9090/'
+            domain: 'http://localhost:9090/'
             // domain: 'http://devwx.asters.cn/'
-            domain: 'http://wx.asters.cn/'
+            // domain: 'http://wx.asters.cn/'
         },
         mounted() {
             this.list();
@@ -126,6 +126,7 @@
                         console.log(error);
                     })
             },
+            // item.id,item.poId,item.projectId,item.poType,item.poId,item.projectName,item.state
             detail(id, poId,projectId,poType,state) {
                 if (poType === 1) {
                     if (state === 100) {
@@ -142,12 +143,34 @@
                 }
                 if (poType === 5) {
                     if (state === 100) {
-                        $.cookie('handledPayId', poId);
+                        $.cookie('handledPayId', poId,{ expires: 1,path:'/'});
                         window.location.href = this.domain + "pay/portal/handledSubstituteOrderDetail";
+                        // if (flyOrderFlag === 100){
+                        //     //代发
+                        //     $.cookie('payId', poId,{ expires: 1,path:'/'});
+                        //     $.cookie('auditId', id,{ expires: 1,path:'/'});
+                        //     $.cookie('state', state,{ expires: 1,path:'/'});
+                        //     window.location.href = this.domain + "pay/portal/paySaleDetail";
+                        // }else {
+                        //     //代发
+                        //     $.cookie('payId', poId,{ expires: 1,path:'/'});
+                        //     $.cookie('auditId', id,{ expires: 1,path:'/'});
+                        //     $.cookie('state', state,{ expires: 1,path:'/'});
+                        //     window.location.href = this.domain + "pay/portal/paySubstituteDetail";
+                        // }
+                        // if (projectName === 1){
+                        //     //代发
+                        //     $.cookie('handledPayId', poId,{ expires: 1,path:'/'});
+                        //     window.location.href = this.domain + "pay/portal/handledSubstituteOrderDetail";
+                        // }else {
+                        //     //分销
+                        //     $.cookie('handledPayId', poId,{ expires: 1,path:'/'});
+                        //     window.location.href = this.domain + "pay/portal/handledSaleOrderDetail";
+                        // }
                     }else{
-                        $.cookie('payId', poId);
-                        $.cookie('auditId', id);
-                        $.cookie('state', state);
+                        $.cookie('payId', poId,{ expires: 1,path:'/'});
+                        $.cookie('auditId', id,{ expires: 1,path:'/'});
+                        $.cookie('state', state,{ expires: 1,path:'/'});
                         window.location.href = this.domain + "pay/portal/paySubstituteDetail";
                     }
                 }

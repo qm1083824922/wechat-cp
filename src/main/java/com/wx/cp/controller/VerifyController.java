@@ -3,17 +3,15 @@ package com.wx.cp.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.wx.cp.common.ServerResponse;
 import com.wx.cp.constants.URLConstant;
-import com.wx.cp.utils.VerifyUtil;
 import com.wx.cp.utils.TokenUtil;
+import com.wx.cp.utils.VerifyUtil;
 import com.wx.cp.vo.AuditFlowsVO;
 import com.wx.cp.vo.AuditVO;
 import com.wx.cp.vo.ResultVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Objects;
@@ -35,8 +33,8 @@ public class VerifyController {
      * @param auditVO
      * @return
      */
-    @RequestMapping(value = "pass", method = {RequestMethod.GET, RequestMethod.POST})
-    public ServerResponse<ResultVO<AuditFlowsVO>> verifyPass(HttpServletRequest request, AuditVO auditVO) {
+    @PostMapping("pass")
+    public ServerResponse<ResultVO<AuditFlowsVO>> verifyPass(HttpServletRequest request, @RequestBody AuditVO auditVO) {
         try {
             String openid = tokenUtil.getToken(request);
 //            String openid = "YueYi";

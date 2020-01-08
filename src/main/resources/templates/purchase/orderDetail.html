@@ -181,16 +181,14 @@
                     return false;
                 }
                 const url = this.domain + "verify/pass";
-                axios.get(url, {
-                    params: {
-                        auditId: $.cookie('auditId'),
-                        poId: $.cookie('poId'),
-                        projectId: $.cookie('projectId'),
-                        suggestion: this.suggestion,
-                        operation: 1,
-                        poType: 1,
-                        state: $.cookie('state')
-                    }
+                axios.post(url, {
+                    auditId: $.cookie('auditId'),
+                    poId: $.cookie('poId'),
+                    projectId: $.cookie('projectId'),
+                    suggestion: this.suggestion,
+                    operation: 1,
+                    poType: 1,
+                    state: $.cookie('state')
                 })
                     .then((response) => {
                         window.location.href = this.domain + "pay/portal/waitingPayOrderList";
@@ -207,14 +205,12 @@
             },
             verifyRefuse() {
                 const url = this.domain + "verify/pass";
-                axios.get(url, {
-                    params: {
-                        auditId: $.cookie('auditId'),
-                        poId: $.cookie('poId'),
-                        suggestion: this.suggestion,
-                        operation: 2,
-                        poType: 1
-                    }
+                axios.post(url, {
+                    auditId: $.cookie('auditId'),
+                    poId: $.cookie('poId'),
+                    suggestion: this.suggestion,
+                    operation: 2,
+                    poType: 1
                 })
                     .then((response) => {
                         window.location.href = this.domain + "pay/portal/waitingPayOrderList";

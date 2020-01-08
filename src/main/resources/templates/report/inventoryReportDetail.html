@@ -16,37 +16,19 @@
             border
             style="width: 100%">
             <el-table-column type="index" label="序号" width="50" ></el-table-column>
-            <el-table-column prop="projectName" label="项目"></el-table-column>
-            <el-table-column prop="warehouseName" label="仓库"></el-table-column>
-            <el-table-column prop="goodsType" label="商品分类"></el-table-column>
-            <el-table-column prop="brand" label="商品品牌"></el-table-column>
-            <el-table-column prop="goodsNo" label="商品编码" width="120"></el-table-column>
-            <el-table-column prop="barCode" label="商品国际码" width="125"></el-table-column>
-            <el-table-column prop="goodsName" label="商品描述" width="130"></el-table-column>
-            <el-table-column prop="sumStore" :formatter="stateFormat" label="总库存金额"></el-table-column>
-            <el-table-column prop="sumNum" label="总数量"></el-table-column>
-            <el-table-column prop="sumLock" :formatter="stateFormat"  label="锁定库存金额"></el-table-column>
-            <el-table-column prop="sumNotLock" :formatter="stateFormat" label="未锁定库存金额"></el-table-column>
-            <el-table-column prop="sumLockNum" label="锁定数量"></el-table-column>
-            <el-table-column prop="sumNotLockNum" label="未锁定数量"></el-table-column>
-            <el-table-column prop="inLibraryCount1" label="(0,20)天库龄数量"></el-table-column>
-            <el-table-column prop="inLibraryAmount1" :formatter="stateFormat" label="(0,20)天库龄金额"></el-table-column>
-            <el-table-column prop="inLibraryCount2" label="[20,60)天库龄数量"></el-table-column>
-            <el-table-column prop="inLibraryAmount2" :formatter="stateFormat" label="[20,60)天库龄金额"></el-table-column>
-            <el-table-column prop="inLibraryCount3" label="[60,+∞)天库龄数量"></el-table-column>
-            <el-table-column prop="inLibraryAmount3" :formatter="stateFormat" label="[60,+∞)天库龄金额"></el-table-column>
-            <el-table-column prop="dateOfExpiryCount1" label="(0,⅓)效期内数量"></el-table-column>
-            <el-table-column prop="dateOfExpiryAmount1" label="(0,⅓)效期内金额"></el-table-column>
-            <el-table-column prop="dateOfExpiryCount2" label="[⅓,½)效期内数量"></el-table-column>
-            <el-table-column prop="dateOfExpiryAmount2" label="[⅓,½)效期内金额"></el-table-column>
-            <el-table-column prop="dateOfExpiryCount3" label="[½,+∞)效期内数量"></el-table-column>
-            <el-table-column prop="dateOfExpiryAmount3" :formatter="stateFormat" label="[½,+∞)效期内金额"></el-table-column>
+            <el-table-column prop="billNo" label="单据编号"></el-table-column>
+            <el-table-column prop="billDate" label="单据日期"></el-table-column>
+            <el-table-column prop="billTypeName" label="单据类型"></el-table-column>
+            <el-table-column prop="number" label="数量"></el-table-column>
+            <el-table-column prop="amount" label="金额"></el-table-column>
+            <el-table-column prop="numberSum" label="数量结余"></el-table-column>
+            <el-table-column prop="amountSum" label="金额结余"></el-table-column>
         </el-table>
         <el-pagination
             @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
-            :page-sizes="[15, 25, 35, 45]"
+            :page-sizes="[10, 20, 30, 50]"
             :page-size="pagesize"
             layout="total, sizes, prev, pager, next, jumper"
             :total="tableData.length">
@@ -68,11 +50,11 @@
         data() {
             return {
                 currentPage:1, //初始页
-                pagesize:15,    //    每页的数据
+                pagesize:10,    //    每页的数据
                 tableData: [],
-                // domain: 'http://localhost:9090/'
+                domain: 'http://localhost:9090/'
                 // domain: 'http://devwx.asters.cn/'
-                domain: 'http://wx.asters.cn/'
+                // domain: 'http://wx.asters.cn/'
             }
         },
         mounted(){
@@ -87,13 +69,6 @@
             handleCurrentChange: function(currentPage){
                 this.currentPage = currentPage;
                 console.log(this.currentPage)  //点击第几页
-            },
-            stateFormat(row, column, cellValue) {
-                cellValue += '';
-                if (!cellValue.includes('.')) cellValue += '.';
-                return cellValue.replace(/(\d)(?=(\d{3})+\.)/g, function ($0, $1) {
-                    return $1 + ',';
-                }).replace(/\.$/, '');
             },
             handleList(){
                 const url = this.domain + 'inventoryReport/detail';
@@ -110,16 +85,12 @@
                         console.log(error);
                     });
             },
-            handleDetail(row){
-                $.cookie('projectId', row.projectId);
-                window.location.href = this.domain + "report/inventoryReportDetail";
-            },
             getSummaries(param) {
                 const { columns, data } = param;
                 const sums = [];
                 columns.forEach((column, index) => {
                     if (index === 0) {
-                        sums[index] = '合计';
+                        sums[index] = '总价';
                         return;
                     }
                     const values = data.map(item => Number(item[column.property]));

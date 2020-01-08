@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -95,15 +96,20 @@ public class HttpAPI {
         System.out.println(now.plusDays(120));
         System.out.println(period);
 
-        BigDecimal bigDecimal = new BigDecimal("-1");
+        BigDecimal bigDecimal = new BigDecimal("-11");
         BigDecimal bigDecima1l = new BigDecimal("0");
-        BigDecimal bigDecimal2 = new BigDecimal("1");
+        BigDecimal bigDecimal2 = new BigDecimal("12");
         int i1 = bigDecimal.compareTo(BigDecimal.ZERO);
         int i2 = bigDecima1l.compareTo(BigDecimal.ZERO);
         int i3 = bigDecimal2.compareTo(BigDecimal.ZERO);
         System.out.println(i1);
         System.out.println(i2);
         System.out.println(i3);
+
+        LocalDate of = LocalDate.of(2019, 6, 10);
+        LocalDate of1 = LocalDate.of(2019,12,12);
+        long until = of.until(of1, ChronoUnit.DAYS);
+        System.out.println(until);
     }
 
     @Test
@@ -136,29 +142,46 @@ public class HttpAPI {
 
     @Test
     public void testMoney(){
-        BigDecimal bigDecimal = new BigDecimal("0.130266");
-        BigDecimal bigDecimal1 = new BigDecimal("2422198");
-        BigDecimal bigDecimal2 = bigDecimal1.divide(bigDecimal,2,RoundingMode.HALF_UP);
-        System.out.println(bigDecimal2);
+        BigDecimal decimal = new BigDecimal("0.130266");
+        BigDecimal divisor = new BigDecimal("2422198");
+        BigDecimal trade = divisor.divide(decimal,2,RoundingMode.HALF_UP);
+        System.out.println(trade);
+        //将BigDecimal类型值转成百分数
+        NumberFormat percent = NumberFormat.getPercentInstance();
+        percent.setMaximumFractionDigits(3);
+        String percentage = percent.format(decimal.doubleValue());
+        System.out.println("百分数 = " + percentage);
         LocalDateTime date = LocalDateTime.now();
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime firstday = date.with(TemporalAdjusters.firstDayOfMonth());
-        System.out.println(firstday.format(dateTimeFormatter));
+        //使用LocalDateTime获取本月的第一天
+        LocalDateTime firstDay = date.with(TemporalAdjusters.firstDayOfMonth());
+        System.out.println(firstDay.format(dateTimeFormatter));
+        //使用LocalDateTime获取本月的最后一天
         LocalDateTime lastDay = date.with(TemporalAdjusters.lastDayOfMonth());
+        //计算时间类型为LocalDateTime月初与当前时间的时间间隔
+        System.out.println("计算时间类型为LocalDateTime月初与当前时间的时间间隔" + firstDay.until(date, ChronoUnit.DAYS));
+        System.out.println("计算时间类型为LocalDateTime月初与月末的时间间隔" + firstDay.until(lastDay, ChronoUnit.DAYS));
         CurrentDateTime date1 = getMonthStartAndEndDate();
         System.out.println(date1.getStartDate());
         System.out.println(date1.getEndDate());
         System.out.println(lastDay.format(dateTimeFormatter));
 
         CurrentDateTime currentDateTime = new CurrentDateTime();
-        boolean wechatFlag = currentDateTime.isIswechatFlag();
-        System.out.println(wechatFlag);
+        boolean wechatFlag = currentDateTime.isWechatFlag();
+        System.out.println("boolean默认值是：" + wechatFlag);
 
-        LocalDate of = LocalDate.of(2020, 1, 25);
-        LocalDate of1 = LocalDate.of(2021, 2, 11);
         LocalDate now = LocalDate.now();
-        System.out.println(now.until(of, ChronoUnit.DAYS));
-        System.out.println(now.until(of1, ChronoUnit.DAYS));
+        //使用LocalDate获取本月的第一天
+        LocalDate firstDayOfMonth = now.with(TemporalAdjusters.firstDayOfMonth());
+        //使用LocalDate获取本月的最后一天
+        LocalDate lastDayOfMonth = now.with(TemporalAdjusters.lastDayOfMonth());
+        //当前时间前30天
+        LocalDate startDate = now.minusDays(30);
+
+        System.out.println("当前时间前29天日期：" + startDate);
+        //计算月初与当前时间的时间间隔
+        System.out.println("计算时间类型为LocalDate月初与当前时间的时间间隔：" + firstDayOfMonth.until(now, ChronoUnit.DAYS));
+        System.out.println("计算时间类型为LocalDate月初与月末的时间间隔：" + firstDayOfMonth.until(lastDayOfMonth, ChronoUnit.DAYS));
     }
 
     @Test
@@ -208,6 +231,43 @@ public class HttpAPI {
             return true;
         }
         return false;
+    }
+
+    /**
+     * 高:12 长:6 宽 6
+     *
+     * @return
+     */
+    @Test
+    public void number() {
+//        int all = 12 * 6 * 6 * 288;
+//        for (int i = 0; i < 80; i++) {
+//            for (int j = 0; j < 80; j++) {
+//                for (int k = 0; k < 80; k++) {
+//                    if (i * j * k == all) {
+//                        if (i > 6 || j > 6 || k > 12) {
+//                            System.out.println("长=" + i + " 宽=" + j + " 高=" + k);
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        int a = 60*50*40-12*6*6*288;
+//        BigDecimal abs = new BigDecimal(""+a);
+//        int b = 12*6*6;
+//        BigDecimal abd = new BigDecimal(""+b);
+//        System.out.println("a = "+a);
+//        System.out.println("b = "+b);
+//        System.out.println(abs.divide(abd,2,RoundingMode.HALF_UP));
+
+        System.out.println(10176-2969+4934-4688);
+        System.out.println(2579480.32-734724.14+1244507.83-1189962.27);
+
+        BigDecimal a = new BigDecimal("10.176");
+        BigDecimal b = new BigDecimal("29.69");
+        BigDecimal c = new BigDecimal("49.34");
+        System.out.println(a.add(b).subtract(c).setScale(2,RoundingMode.HALF_UP));
+
     }
 
 

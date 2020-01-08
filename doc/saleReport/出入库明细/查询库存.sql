@@ -1,0 +1,13 @@
+SELECT
+    id,
+    bill_in_store_no,
+    project_id,
+    warehouse_id,
+    bill_in_store_id,
+    bill_in_store_dtl_id,
+    goods_id,
+    cost_price,
+    in_store_num,
+    store_num
+FROM
+    tb_stl

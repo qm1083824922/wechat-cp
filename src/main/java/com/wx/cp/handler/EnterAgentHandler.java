@@ -12,10 +12,10 @@ import java.util.Map;
 /**
  * <pre>
  *
- * Created by Binary Wang on 2018/8/27.
+ * Created by qm on 2018/8/27.
  * </pre>
  *
- * @author <a href="https://github.com/binarywang">Binary Wang</a>
+ * @author qm
  */
 @Slf4j
 public class EnterAgentHandler extends AbstractHandler {

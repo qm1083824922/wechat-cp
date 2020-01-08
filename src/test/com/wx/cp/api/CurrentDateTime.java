@@ -11,5 +11,5 @@ public class CurrentDateTime {
 
     private String startDate;
     private String endDate;
-    private boolean iswechatFlag;
+    private boolean wechatFlag;
 }

@@ -38,5 +38,6 @@ public class WaitingVerifyOrderVO implements Serializable {
     private String stateName;
     private String proposerDayTime;
     private Boolean warn;
+    private Integer flyOrderFlag;
 
 }
